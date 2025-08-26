@@ -45,7 +45,7 @@ body {
     flex-direction: column; /* Stack elements vertically */
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    /* height: 100vh; */
     padding: 1rem;
 }
 
@@ -180,4 +180,94 @@ body {
         width: 100%;
         border-left: none;
     }
+}
+
+/* --- Footer Styles --- */
+footer {
+    position: relative; /* または static */
+    width: 100%;
+    text-align: center;
+    padding: 1rem 0;
+    color: rgba(255, 255, 255, 0.7); /* 少し透明感のある白 */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 読みやすくするための影 */
+    z-index: 1; /* 他の要素の下に隠れないように */
+}
+
+/* --- Open Info Button Styles --- */
+#open-info-button {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1rem 2rem;
+    border-radius: 50px; /* 丸み */
+    border: 2px solid white;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+#open-info-button:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
+}
+
+/* --- Info Modal Styles --- */
+#infoModal .modal-content {
+    background: rgba(255, 255, 255, 0.1); /* より透明感を出す */
+    -webkit-backdrop-filter: blur(15px); /* ぼかしを強く */
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* 枠線を少し目立たせる */
+    border-radius: 15px; /* 角を丸く */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* 影を強調 */
+    color: white; /* テキスト色を白に */
+}
+
+#infoModal .modal-header,
+#infoModal .modal-footer {
+    border-bottom: none; /* デフォルトの線を削除 */
+    border-top: none; /* デフォルトの線を削除 */
+    background: transparent; /* 透明に */
+    color: white; /* テキスト色を白に */
+}
+
+#infoModal .modal-title {
+    color: white; /* タイトル色を白に */
+    font-weight: bold;
+}
+
+#infoModal .modal-body {
+    color: white; /* ボディのテキスト色を白に */
+}
+
+#infoModal .btn-close {
+    filter: invert(1) grayscale(1) brightness(2); /* 白いXボタンにする */
+}
+
+#infoModal .btn-secondary {
+    background-color: rgba(255, 255, 255, 0.2); /* 閉じるボタンの背景色 */
+    border-color: rgba(255, 255, 255, 0.3); /* 閉じるボタンの枠線色 */
+    color: white; /* 閉じるボタンのテキスト色 */
+}
+
+#infoModal .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+#infoModal h4, #infoModal h5 {
+    color: white; /* 見出しの色を白に */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+#infoModal ol, #infoModal p {
+    color: rgba(255, 255, 255, 0.8); /* リストと段落のテキスト色 */
+}
+
+#infoModal a {
+    color: #87CEEB; /* リンクの色を水色に */
+    text-decoration: none;
+}
+
+#infoModal a:hover {
+    text-decoration: underline;
 }
