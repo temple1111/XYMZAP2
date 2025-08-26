@@ -14,6 +14,7 @@
         <h1 class="display-3 fw-bolder text-white text-shadow">KINNIKU-TOKEN<br>CHALLENGE</h1>
         <p class="lead fw-normal text-white-50 mb-4 text-shadow">今日の筋トレを記録し、報酬を掴み取れ</p>
         <button id="open-drawer-button">チャレンジに参加する</button>
+        <button id="open-info-button" class="mt-3">使い方・ウォレット作成</button>
     </div>
 
     <div id="drawer-overlay" class="hidden"></div>
@@ -64,12 +65,21 @@
                     <div class="accordion-item glass-card">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                Symbolアドレスをお持ちでない方はこちら
+                                使い方・ウォレット作成について
                             </button>
                         </h2>
                         <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#newUserAccordion">
                             <div class="accordion-body">
-                                <strong>KINNIKU-TOKENを受け取るには？</strong>
+                                <h4>KINNIKU-TOKEN CHALLENGEへようこそ！</h4>
+                                <p>このアプリは、あなたの筋力トレーニングの努力を「KINNIKU-TOKEN」として報酬に変え、モチベーションを最大限に引き出すためのものです。</p>
+                                <h5>アプリの使い方</h5>
+                                <ol>
+                                    <li>「チャレンジに参加する」ボタンから、あなたのSymbolアドレスと筋トレ回数を入力します。</li>
+                                    <li>「報酬を獲得」ボタンを押すと、入力した筋トレ回数に応じたKINNIKU-TOKENがあなたのウォレットに送られます。</li>
+                                    <li>保有トークン数に応じて、あなたのレベルが上がり、背景も変化します。マッスルマスターを目指しましょう！</li>
+                                    <li>AIトレーナーからの熱いメッセージで、さらなるモチベーションアップ！</li>
+                                </ol>
+                                <h5>KINNIKU-TOKENを受け取るには？</h5>
                                 <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
                                 <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
                                 <p class="mt-2">作成は数分で完了します！</p>
@@ -257,6 +267,17 @@
             openDrawerButton.addEventListener('click', openDrawer);
             closeDrawerButton.addEventListener('click', closeDrawer);
             overlay.addEventListener('click', closeDrawer);
+
+            // 新しいボタンのイベントリスナー
+            const openInfoButton = document.getElementById('open-info-button');
+            if (openInfoButton) {
+                openInfoButton.addEventListener('click', () => {
+                    openDrawer(); // ドロワーを開く
+                    const collapseElement = document.getElementById('collapseOne');
+                    const bsCollapse = new bootstrap.Collapse(collapseElement, { toggle: false });
+                    bsCollapse.show(); // アコーディオンを開く
+                });
+            }
         });
     </script>
 </body>
