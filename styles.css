@@ -1,0 +1,183 @@
+/* styles.css */
+
+/* --- General Body & Background --- */
+body {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+    transition: background-image 0.5s ease-in-out;
+    overflow: hidden; /* Prevent body scroll when drawer is open */
+    animation: background-zoom-pan 60s infinite alternate; /* Apply background animation */
+}
+
+/* Keyframes for background animation */
+@keyframes background-zoom-pan {
+    0% {
+        background-size: 100%;
+        background-position: center center;
+    }
+    50% {
+        background-size: 110%;
+        background-position: 60% 40%;
+    }
+    100% {
+        background-size: 100%;
+        background-position: center center;
+    }
+}
+
+/* --- Background Image Classes --- */
+.background-0 { background-image: url('0.png'); }
+.background-1 { background-image: url('1.png'); }
+.background-2 { background-image: url('2.png'); }
+.background-3 { background-image: url('3.png'); }
+.background-4 { background-image: url('4.png'); }
+.background-5 { background-image: url('5.png'); }
+.background-6 { background-image: url('6.png'); }
+.background-7 { background-image: url('7.png'); }
+.background-8 { background-image: url('8.png'); }
+.background-9 { background-image: url('9.png'); }
+
+/* --- Main Action Button --- */
+.main-action-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 1rem;
+}
+
+.main-action-container h1, .main-action-container p {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    animation: text-fade-in-scale 1.5s ease-out forwards; /* Apply text animation */
+}
+
+.main-action-container p {
+    animation-delay: 0.5s; /* Delay subtitle animation */
+}
+
+/* Keyframes for text animation */
+@keyframes text-fade-in-scale {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#open-drawer-button {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    border: 2px solid white;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-top: 2rem; /* Space between text and button */
+}
+
+#open-drawer-button:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
+}
+
+/* --- Drawer Styles --- */
+#drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    transition: opacity 0.4s ease;
+}
+
+#transaction-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 95%;
+    max-width: 550px;
+    height: 100%;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.4s ease-out;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#transaction-drawer.is-open {
+    transform: translateX(0);
+}
+
+#close-drawer-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    color: #555;
+    background: rgba(0,0,0,0.1);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1001; /* Ensure it's above other drawer content */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#close-drawer-button:hover {
+    color: #000;
+    background: rgba(0,0,0,0.2);
+}
+
+/* --- Content Inside Drawer --- */
+.card.glass-card {
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+}
+
+.card-body {
+    overflow-y: auto;
+}
+
+.accordion-item.glass-card, 
+.accordion-button {
+    background: transparent !important;
+}
+
+/* --- Utility Classes --- */
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 576px) {
+    #transaction-drawer {
+        width: 100%;
+        border-left: none;
+    }
+}

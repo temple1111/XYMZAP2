@@ -1,0 +1,16 @@
+{
+  "name": "xymzap-api",
+  "version": "1.0.0",
+  "description": "API for XYMZAP",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.1.0",
+    "symbol-sdk": "^2.0.4"
+  }
+}
