@@ -6,6 +6,9 @@ const NODE = 'https://xym.jp1.node.leywapool.com:3001';
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const SYMBOL_EPOCH_ADJUSTMENT = 1615853188;
 
+// --- Calorie Calculation Constant ---
+const CALORIES_PER_REP = 0.5; // Example: 0.5 kcal per rep
+
 // --- Gemini-related setup ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
@@ -54,6 +57,9 @@ module.exports = async (req, res) => {
         const generatedMessage = await generateTransactionMessage(amount);
         const txMessage = PlainMessage.create(generatedMessage);
 
+        // Calculate estimated calories
+        const estimatedCalories = amount * CALORIES_PER_REP;
+
         // Setup Symbol transaction
         const repoFactory = new RepositoryFactoryHttp(NODE);
         const networkType = await repoFactory.getNetworkType().toPromise();
@@ -74,7 +80,7 @@ module.exports = async (req, res) => {
         const transactionHttp = repoFactory.createTransactionRepository();
         await transactionHttp.announce(signedTx).toPromise();
 
-        res.status(200).json({ message: 'Transaction announced successfully!', transactionMessage: txMessage.payload });
+        res.status(200).json({ message: 'Transaction announced successfully!', transactionMessage: txMessage.payload, estimatedCalories: estimatedCalories });
 
     } catch (error) {
         console.error(error);

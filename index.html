@@ -28,9 +28,18 @@
                 <div id="tokenBalance" class="alert alert-info text-center fw-bold" role="alert">
                     保有トークン数量: 0 KINNIKU-TOKEN
                 </div>
+
+                <!-- Progress Bar / Level System -->
+                <div class="mb-3">
+                    <p class="text-center mb-1 fw-bold" id="levelDisplay">レベル: ビギナー (0%)</p>
+                    <div class="progress" role="progressbar" aria-label="Level Progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-success" style="width: 0%"></div>
+                    </div>
+                </div>
             
                 <div id="transactionDetails" class="alert alert-success mt-3 d-none" role="alert">
                     <p id="message" class="mb-0">message: </p>
+                    <p id="estimatedCaloriesDisplay" class="mb-0 mt-2"></p>
                 </div>
 
                 <p id="siteDescription" class="text-center text-muted mb-4">あなたのSYMBOLアドレスと筋トレ回数を入力し、報酬獲得ボタンを押してください。</p>
@@ -79,6 +88,13 @@
         const sym = require("/node_modules/symbol-sdk");
         const repo = new sym.RepositoryFactoryHttp(NODE);
 
+        // Level thresholds and names
+        const LEVEL_THRESHOLDS = [0, 200, 500, 1000, 2000, 3000, 5000, 7500, 10000, 15000, 20000];
+        const LEVEL_NAMES = [
+            "ビギナー", "ルーキー", "マッスル見習い", "中級マッスル", "ベテラントレーニー",
+            "プロビルダー", "筋肉の賢者", "鋼の肉体", "神の領域", "レジェンド", "マッスルマスター"
+        ];
+
         async function createAndSendTransaction() {
             const recipientAddressValue = document.getElementById('recipientAddress').value;
             const amountValue = document.getElementById('amount').value;
@@ -116,9 +132,13 @@
 
                 const data = await response.json();
                 const transactionDetails = document.getElementById('transactionDetails');
+                const estimatedCaloriesDisplay = document.getElementById('estimatedCaloriesDisplay');
 
                 if (response.ok) {
                     document.getElementById('message').textContent = `message: ${data.transactionMessage}`;
+                    if (data.estimatedCalories !== undefined) {
+                        estimatedCaloriesDisplay.textContent = `消費カロリー: ${data.estimatedCalories.toFixed(1)} kcal`;
+                    }
                     transactionDetails.classList.remove('d-none');
                     getAndDisplayTokenBalance(recipientAddressValue);
                 } else {
@@ -149,19 +169,20 @@
                 
                 bodyElement.className = 'background-0'; // Reset class
 
+                let currentTokenCount = 0;
                 if (tokenBalance) {
-                    const tokenCount = tokenBalance.amount.compact();
-                    tokenBalanceElement.textContent = `保有トークン数量: ${tokenCount} KINNIKU-TOKEN`;
+                    currentTokenCount = tokenBalance.amount.compact();
+                    tokenBalanceElement.textContent = `保有トークン数量: ${currentTokenCount} KINNIKU-TOKEN`;
 
-                    if (tokenCount >= 0 && tokenCount <= 200) bodyElement.classList.add('background-0');
-                    else if (tokenCount <= 300) bodyElement.classList.add('background-1');
-                    else if (tokenCount <= 400) bodyElement.classList.add('background-2');
-                    else if (tokenCount <= 500) bodyElement.classList.add('background-3');
-                    else if (tokenCount <= 1000) bodyElement.classList.add('background-4');
-                    else if (tokenCount <= 1500) bodyElement.classList.add('background-5');
-                    else if (tokenCount <= 2000) bodyElement.classList.add('background-6');
-                    else if (tokenCount <= 2500) bodyElement.classList.add('background-7');
-                    else if (tokenCount <= 3000) bodyElement.classList.add('background-8');
+                    if (currentTokenCount >= 0 && currentTokenCount <= 200) bodyElement.classList.add('background-0');
+                    else if (currentTokenCount <= 300) bodyElement.classList.add('background-1');
+                    else if (currentTokenCount <= 400) bodyElement.classList.add('background-2');
+                    else if (currentTokenCount <= 500) bodyElement.classList.add('background-3');
+                    else if (currentTokenCount <= 1000) bodyElement.classList.add('background-4');
+                    else if (currentTokenCount <= 1500) bodyElement.classList.add('background-5');
+                    else if (currentTokenCount <= 2000) bodyElement.classList.add('background-6');
+                    else if (currentTokenCount <= 2500) bodyElement.classList.add('background-7');
+                    else if (currentTokenCount <= 3000) bodyElement.classList.add('background-8');
                     else bodyElement.classList.add('background-9');
                     
                 } else {

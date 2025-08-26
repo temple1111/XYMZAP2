@@ -8,6 +8,23 @@ body {
     background-position: center center;
     transition: background-image 0.5s ease-in-out;
     overflow: hidden; /* Prevent body scroll when drawer is open */
+    animation: background-zoom-pan 60s infinite alternate; /* Apply background animation */
+}
+
+/* Keyframes for background animation */
+@keyframes background-zoom-pan {
+    0% {
+        background-size: 100%;
+        background-position: center center;
+    }
+    50% {
+        background-size: 110%;
+        background-position: 60% 40%;
+    }
+    100% {
+        background-size: 100%;
+        background-position: center center;
+    }
 }
 
 /* --- Background Image Classes --- */
@@ -25,10 +42,33 @@ body {
 /* --- Main Action Button --- */
 .main-action-container {
     display: flex;
+    flex-direction: column; /* Stack elements vertically */
     justify-content: center;
     align-items: center;
     height: 100vh;
     padding: 1rem;
+}
+
+.main-action-container h1, .main-action-container p {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    animation: text-fade-in-scale 1.5s ease-out forwards; /* Apply text animation */
+}
+
+.main-action-container p {
+    animation-delay: 0.5s; /* Delay subtitle animation */
+}
+
+/* Keyframes for text animation */
+@keyframes text-fade-in-scale {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 #open-drawer-button {
@@ -42,6 +82,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-top: 2rem; /* Space between text and button */
 }
 
 #open-drawer-button:hover {
