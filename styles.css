@@ -74,7 +74,6 @@ body {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    /* Apply glass effect to the drawer itself */
     background: rgba(255, 255, 255, 0.7);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
@@ -89,22 +88,26 @@ body {
     position: absolute;
     top: 15px;
     right: 20px;
-    font-size: 2.5rem;
-    font-weight: lighter;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
     color: #555;
-    background: none;
+    background: rgba(0,0,0,0.1);
     border: none;
+    border-radius: 50%;
     cursor: pointer;
-    padding: 0;
-    line-height: 1;
+    z-index: 1001; /* Ensure it's above other drawer content */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #close-drawer-button:hover {
     color: #000;
+    background: rgba(0,0,0,0.2);
 }
 
 /* --- Content Inside Drawer --- */
-/* The .card is now just a transparent container for Bootstrap structure */
 .card.glass-card {
     background: transparent !important;
     border: none;
@@ -112,10 +115,9 @@ body {
 }
 
 .card-body {
-    overflow-y: auto; /* Make card body scrollable if content overflows */
+    overflow-y: auto;
 }
 
-/* Make accordion inside drawer also transparent */
 .accordion-item.glass-card, 
 .accordion-button {
     background: transparent !important;
@@ -125,4 +127,12 @@ body {
 .hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 576px) {
+    #transaction-drawer {
+        width: 100%;
+        border-left: none;
+    }
 }

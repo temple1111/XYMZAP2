@@ -22,6 +22,15 @@
         <div class="card glass-card h-100">
             <div class="card-body d-flex flex-column">
                 <h3 class="card-title text-center mb-4">筋トレ報酬獲得</h3>
+
+                <div id="tokenBalance" class="alert alert-info text-center fw-bold" role="alert">
+                    保有トークン数量: 0 KINNIKU-TOKEN
+                </div>
+            
+                <div id="transactionDetails" class="alert alert-success mt-3 d-none" role="alert">
+                    <p id="message" class="mb-0">message: </p>
+                </div>
+
                 <p id="siteDescription" class="text-center text-muted mb-4">あなたのSYMBOLアドレスと筋トレ回数を入力し、報酬獲得ボタンを押してください。</p>
                 
                 <form id="transferForm">
@@ -56,14 +65,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="tokenBalance" class="alert alert-info mt-4 text-center fw-bold" role="alert">
-                    保有トークン数量: 0 KINNIKU-TOKEN
-                </div>
-            
-                <div id="transactionDetails" class="alert alert-success mt-3 d-none" role="alert">
-                    <p id="message" class="mb-0">message: </p>
                 </div>
             </div>
         </div>
