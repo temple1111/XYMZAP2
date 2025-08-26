@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Transfer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://xembook.github.io/nem2-browserify/symbol-sdk-2.0.4.js"></script>
+</head>
+<body>
+    <header>
+        <button style="background-color:transparent; border-color:blue; color:white" id="toggleTableOfContents"><img src="XYM.png" alt="Fitness Logo"></button>
+        <ul id="tableOfContents" style="display: none;">
+            <li><a style="font-size: 10px;background-color:transparent; border-color:blue; color:white" href="https://symbol-community.com/ja/docs/1">ウォレット作成</a></li>
+            <li><a style="font-size: 12px;background-color:transparent; border-color:blue; color:white" href="https://ishidad2.github.io/ShareZAP/?address=">ShareZAP</a></li>
+        </ul>
+    </header>
+
+    <div class="container">   
+        <p id="siteDescription"style="font-weight: bold;">こちらのサイトは筋トレを促す特別な場所です。<br>あなたのSYMBOLアドレスと筋トレ回数を入力し、<br>「筋トレ報酬獲得」ボタンを押すとトランザクションが発生し、<br>筋トレ回数に応じたメッセージとKINNIKU-TOKENが贈られます。</p>
+        
+        <form id="transferForm">
+            <label for="recipientAddress">受信者のSYMBOLアドレス</label>
+            <input type="text" id="recipientAddress" name="recipientAddress" required><br><br>
+            
+            <label for="amount">筋トレ回数:</label>
+            <input type="number" id="amount" name="amount" required><br><br>
+            
+            <button type="button" onclick="createAndSendTransaction()">筋トレ報酬を獲得</button>
+        </form>
+
+        <div class="new-user-guide">
+            <button id="toggle-guide-button">Symbolアドレスをお持ちでない方はこちら</button>
+            <div id="guide-content" style="display: none;">
+                <h4>KINNIKU-TOKENを受け取るには？</h4>
+                <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。</p>
+                <p>これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
+                <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
+                <p>作成は数分で完了します！</p>
+            </div>
+        </div>
+
+        <p id="tokenBalance">保有トークン数量: 0 KINNIKU-TOKEN</p>
+    
+        <div id="transactionDetails">
+            <p id="message">message: </p>
+        </div>
+    </div>
+
+    <script>
+        // --- Frontend Logic ---
+        const NODE = 'https://xym.jp1.node.leywapool.com:3001';
+        const sym = require("/node_modules/symbol-sdk");
+        const repo = new sym.RepositoryFactoryHttp(NODE);
+
+        async function createAndSendTransaction() {
+            const recipientAddressValue = document.getElementById('recipientAddress').value;
+            const amountValue = document.getElementById('amount').value;
+
+            if (!recipientAddressValue || !amountValue || amountValue <= 0) {
+                alert("受信者のSYMBOLアドレスと筋トレ回数を正しく入力してください。");
+                return;
+            }
+
+            try {
+                sym.Address.createFromRawAddress(recipientAddressValue);
+            } catch (error) {
+                alert("アドレスの形式が正しくないようです。");
+                return;
+            }
+
+            const button = document.querySelector('#transferForm button');
+            button.disabled = true;
+            button.textContent = '処理中...';
+
+            try {
+                const response = await fetch('/api/send-transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        recipientAddress: recipientAddressValue, 
+                        amount: parseInt(amountValue) 
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("トランザクションが正常に送信されました！");
+                    document.getElementById('message').textContent = `message: ${data.transactionMessage}`;
+                    getAndDisplayTokenBalance(recipientAddressValue);
+                } else {
+                    throw new Error(data.message || '不明なエラーが発生しました。');
+                }
+
+            } catch (error) {
+                console.error("API呼び出し中にエラーが発生しました:", error);
+                alert(`エラー: ${error.message}`);
+            } finally {
+                button.disabled = false;
+                button.textContent = '筋トレ報酬を獲得';
+            }
+        }
+
+        async function getAndDisplayTokenBalance(address) {
+            const tokenId = '44FD959F9F2ECF4D';
+            if (!address) return;
+
+            try {
+                const accountHttp = repo.createAccountRepository();
+                const accountAddress = sym.Address.createFromRawAddress(address);
+                const accountInfo = await accountHttp.getAccountInfo(accountAddress).toPromise();
+                const tokenBalance = accountInfo.mosaics.find(mosaic => mosaic.id.toHex() === tokenId);
+
+                const tokenBalanceElement = document.getElementById('tokenBalance');
+                const bodyElement = document.body;
+                
+                bodyElement.className = '';
+
+                if (tokenBalance) {
+                    const tokenCount = tokenBalance.amount.compact();
+                    tokenBalanceElement.textContent = `保有トークン数量: ${tokenCount} KINNIKU-TOKEN`;
+
+                    if (tokenCount >= 0 && tokenCount <= 200) bodyElement.classList.add('background-0');
+                    else if (tokenCount <= 300) bodyElement.classList.add('background-1');
+                    else if (tokenCount <= 400) bodyElement.classList.add('background-2');
+                    else if (tokenCount <= 500) bodyElement.classList.add('background-3');
+                    else if (tokenCount <= 1000) bodyElement.classList.add('background-4');
+                    else if (tokenCount <= 1500) bodyElement.classList.add('background-5');
+                    else if (tokenCount <= 2000) bodyElement.classList.add('background-6');
+                    else if (tokenCount <= 2500) bodyElement.classList.add('background-7');
+                    else if (tokenCount <= 3000) bodyElement.classList.add('background-8');
+                    else bodyElement.classList.add('background-9');
+                    
+                } else {
+                    tokenBalanceElement.textContent = 'トークンを保有していません';
+                    bodyElement.classList.add('background-0');
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('tokenBalance').textContent = 'アドレスの形式が正しくないようです';
+                document.body.className = 'background-0';
+            }
+        }
+
+        function updateBackground() {
+            const recipientAddress = document.getElementById('recipientAddress').value;
+            getAndDisplayTokenBalance(recipientAddress);
+        }
+
+        // --- Event Listeners ---
+        window.onload = function () {
+            // Background update logic
+            updateBackground();
+            document.getElementById('recipientAddress').addEventListener('input', updateBackground);
+
+            // Toggle logic
+            document.getElementById('toggleTableOfContents').addEventListener('click', function() {
+                const tableOfContents = document.getElementById('tableOfContents');
+                if (tableOfContents.style.display === 'none') {
+                    tableOfContents.style.display = 'block';
+                } else {
+                    tableOfContents.style.display = 'none';
+                }
+            });
+
+            // New user guide toggle logic
+            document.getElementById('toggle-guide-button').addEventListener('click', function() {
+                const guideContent = document.getElementById('guide-content');
+                if (guideContent.style.display === 'none') {
+                    guideContent.style.display = 'block';
+                } else {
+                    guideContent.style.display = 'none';
+                }
+            });
+        };
+    </script>
+</body>
+</html>
