@@ -184,10 +184,38 @@
                     else if (currentTokenCount <= 2500) bodyElement.classList.add('background-7');
                     else if (currentTokenCount <= 3000) bodyElement.classList.add('background-8');
                     else bodyElement.classList.add('background-9');
+
+                    let currentLevelIndex = 0;
+                    let progressPercentage = 0;
+
+                    for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+                        if (currentTokenCount >= LEVEL_THRESHOLDS[i]) {
+                            currentLevelIndex = i;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (currentLevelIndex < LEVEL_THRESHOLDS.length - 1) {
+                        const lowerBound = LEVEL_THRESHOLDS[currentLevelIndex];
+                        const upperBound = LEVEL_THRESHOLDS[currentLevelIndex + 1];
+                        if (upperBound > lowerBound) {
+                            progressPercentage = ((currentTokenCount - lowerBound) / (upperBound - lowerBound)) * 100;
+                        }
+                    } else {
+                        progressPercentage = 100;
+                    }
+
+                    const levelName = LEVEL_NAMES[currentLevelIndex];
+                    document.getElementById('levelDisplay').textContent = `レベル: ${levelName} (${Math.floor(progressPercentage)}%)`;
+                    document.querySelector('.progress-bar').style.width = `${progressPercentage}%`;
                     
                 } else {
                     tokenBalanceElement.textContent = 'トークンを保有していません';
                     bodyElement.classList.add('background-0');
+                    // トークンがない場合もレベル表示をリセット
+                    document.getElementById('levelDisplay').textContent = `レベル: ビギナー (0%)`;
+                    document.querySelector('.progress-bar').style.width = `0%`;
                 }
             } catch (error) {
                 console.error(error);
