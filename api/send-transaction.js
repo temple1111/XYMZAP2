@@ -20,7 +20,7 @@ const geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
  * @returns {Promise<string>} A motivational message.
  */
 async function generateTransactionMessage(amount) {
-    const prompt = `あなたはプロのフィットネストレーナーです。ユーザーが今、筋力トレーニングを終えました。トレーニング回数は${amount}回です。この回数に応じて、ユーザーを称賛し、次も頑張りたくなるような、短く（50文字以内）、力的で、ポジティブなメッセージを生成してください。`;
+    const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、筋力トレーニングを終えました。トレーニング回数は${amount}回です。この回数を見て、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（50文字以内）を生成してください。例：「その1回が筋肉をデカくする！」「昨日の自分を超えたな！」`;
 
     try {
         const result = await geminiModel.generateContent(prompt);

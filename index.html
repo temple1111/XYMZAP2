@@ -10,8 +10,10 @@
 </head>
 <body class="background-0">
 
-    <div class="main-action-container">
-        <button id="open-drawer-button">筋トレ報酬を獲得する</button>
+    <div class="main-action-container text-center">
+        <h1 class="display-3 fw-bolder text-white text-shadow">KINNIKU-TOKEN<br>CHALLENGE</h1>
+        <p class="lead fw-normal text-white-50 mb-4 text-shadow">今日の筋トレを記録し、報酬を掴み取れ</p>
+        <button id="open-drawer-button">チャレンジに参加する</button>
     </div>
 
     <div id="drawer-overlay" class="hidden"></div>
@@ -93,6 +95,9 @@
                 return;
             }
 
+            // Save the valid address to localStorage
+            localStorage.setItem('lastUsedAddress', recipientAddressValue);
+
             const button = document.querySelector('#transferForm button');
             button.disabled = true;
             button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 処理中...';
@@ -172,7 +177,14 @@
 
         // --- Event Listeners ---
         window.addEventListener('load', function () {
+            // Load saved address from localStorage
+            const savedAddress = localStorage.getItem('lastUsedAddress');
             const recipientAddressInput = document.getElementById('recipientAddress');
+            if (savedAddress && recipientAddressInput) {
+                recipientAddressInput.value = savedAddress;
+                getAndDisplayTokenBalance(savedAddress); // Also update balance for the saved address
+            }
+
             if(recipientAddressInput) {
                 recipientAddressInput.addEventListener('input', () => getAndDisplayTokenBalance(recipientAddressInput.value));
             }
