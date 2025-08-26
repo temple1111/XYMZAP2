@@ -9,29 +9,29 @@
 </head>
 <body>
     <header>
-        <button style="background-color:transparent; border-color:blue; color:white" id="toggleTableOfContents"><img src="XYM.png" alt="Fitness Logo"></button>
-        <ul id="tableOfContents" style="display: none;">
-            <li><a style="font-size: 10px;background-color:transparent; border-color:blue; color:white" href="https://symbol-community.com/ja/docs/1">ウォレット作成</a></li>
-            <li><a style="font-size: 12px;background-color:transparent; border-color:blue; color:white" href="https://ishidad2.github.io/ShareZAP/?address=">ShareZAP</a></li>
+        <button id="toggleTableOfContents"><img src="XYM.png" alt="Fitness Logo"></button>
+        <ul id="tableOfContents" class="hidden">
+            <li><a href="https://symbol-community.com/ja/docs/1">ウォレット作成</a></li>
+            <li><a href="https://ishidad2.github.io/ShareZAP/?address=">ShareZAP</a></li>
         </ul>
     </header>
 
     <div class="container">   
-        <p id="siteDescription"style="font-weight: bold;">こちらのサイトは筋トレを促す特別な場所です。<br>あなたのSYMBOLアドレスと筋トレ回数を入力し、<br>「筋トレ報酬獲得」ボタンを押すとトランザクションが発生し、<br>筋トレ回数に応じたメッセージとKINNIKU-TOKENが贈られます。</p>
+        <p id="siteDescription">こちらのサイトは筋トレを促す特別な場所です。<br>あなたのSYMBOLアドレスと筋トレ回数を入力し、<br>「筋トレ報酬獲得」ボタンを押すとトランザクションが発生し、<br>筋トレ回数に応じたメッセージとKINNIKU-TOKENが贈られます。</p>
         
         <form id="transferForm">
             <label for="recipientAddress">受信者のSYMBOLアドレス</label>
-            <input type="text" id="recipientAddress" name="recipientAddress" required><br><br>
+            <input type="text" id="recipientAddress" name="recipientAddress" required>
             
             <label for="amount">筋トレ回数:</label>
-            <input type="number" id="amount" name="amount" required><br><br>
+            <input type="number" id="amount" name="amount" required>
             
             <button type="button" onclick="createAndSendTransaction()">筋トレ報酬を獲得</button>
         </form>
 
         <div class="new-user-guide">
             <button id="toggle-guide-button">Symbolアドレスをお持ちでない方はこちら</button>
-            <div id="guide-content" style="display: none;">
+            <div id="guide-content" class="hidden">
                 <h4>KINNIKU-TOKENを受け取るには？</h4>
                 <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。</p>
                 <p>これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
@@ -158,22 +158,12 @@
 
             // Toggle logic
             document.getElementById('toggleTableOfContents').addEventListener('click', function() {
-                const tableOfContents = document.getElementById('tableOfContents');
-                if (tableOfContents.style.display === 'none') {
-                    tableOfContents.style.display = 'block';
-                } else {
-                    tableOfContents.style.display = 'none';
-                }
+                document.getElementById('tableOfContents').classList.toggle('hidden');
             });
 
             // New user guide toggle logic
             document.getElementById('toggle-guide-button').addEventListener('click', function() {
-                const guideContent = document.getElementById('guide-content');
-                if (guideContent.style.display === 'none') {
-                    guideContent.style.display = 'block';
-                } else {
-                    guideContent.style.display = 'none';
-                }
+                document.getElementById('guide-content').classList.toggle('hidden');
             });
         };
     </script>

@@ -1,273 +1,170 @@
 /* styles.css */
+
+/* --- General Body & Background --- */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f0f2f5;
     margin: 0;
-    padding: 0;
-    background-image: url('1.1.png');
-    background-size: 60%; /* 画像をウィンドウ全体にカバーさせる */
-    background-repeat: no-repeat; /* 画像の繰り返し表示を無効にする */
-    background-attachment: fixed; /* 画像を固定背景にする */
-    background-position: center center; /* 画像を中央に配置 */
-}
-
-@media (max-width: 480px) {
-    /* モバイルデバイス用のスタイル */
-    body {
-        font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 0;
-    background-image: url('1.1.png');
-     /* 画像をウィンドウ全体にカバーさせる */
-    background-repeat: no-repeat; /* 画像の繰り返し表示を無効にする */
-     /* 画像を固定背景にする */
-    background-position: center center; /* 画像を中央に配置 */
-        background-attachment: scroll; /* スクロールに設定し、固定背景を解除 */
-        background-size: contain; /* 画像を縦横比を保ったまま表示 */
-        background-position: center top; /* 画像を上部に配置 */
-    }
-}
-
-
-body {
-    background-color: #808080; /* 任意の灰色の色コードを使用できます */
-}
-
-/* styles.css */
-/* トークン保有数に応じた背景スタイル */
-
-.background-0 {
-    background-image: url('8.png'); /* トークン保有数が0の場合の背景画像 */
-}
-
-.background-1 {
-    background-image: url('1.png'); /* トークン保有数が1の場合の背景画像 */
-}
-
-.background-2 {
-    background-image: url('2.png'); /* トークン保有数が2の場合の背景画像 */
-}
-
-.background-3 {
-    background-image: url('3.png'); /* トークン保有数が2の場合の背景画像 */
-}
-
-.background-4 {
-    background-image: url('4.png'); /* トークン保有数が2の場合の背景画像 */
-}
-
-.background-5 {
-    background-image: url('5.png'); /* トークン保有数が2の場合の背景画像 */
-}
-
-.background-6 {
-    background-image: url('6.png'); /* トークン保有数が2の場合の背景画像 */
-}
-
-.background-7 {
-    background-image: url('7.png'); /* トークン保有数が2の場合の背景画像 */
-}
-
-.background-8 {
-    background-image: url('8.png'); /* トークン保有数が2の場合の背景画像 */
-}
-
-.background-9 {
-    background-image: url('9.png'); /* トークン保有数が2の場合の背景画像 */
-}
-/* 他のスタイルは同様に続けることができます */
-
-
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: rgba(255, 255, 255, 0.4); /* 背景色を半透明に設定 */
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    background-size: 60%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+    transition: background-image 0.5s ease-in-out;
 }
 
+/* --- Background Image Classes --- */
+.background-0 { background-image: url('8.png'); }
+.background-1 { background-image: url('1.png'); }
+.background-2 { background-image: url('2.png'); }
+.background-3 { background-image: url('3.png'); }
+.background-4 { background-image: url('4.png'); }
+.background-5 { background-image: url('5.png'); }
+.background-6 { background-image: url('6.png'); }
+.background-7 { background-image: url('7.png'); }
+.background-8 { background-image: url('8.png'); }
+.background-9 { background-image: url('9.png'); }
+
+/* --- Header --- */
 header {
-   margin-left: 0;
- margin-righ: auto;
- width: 30%;
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-header img {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 10px;
-    border-radius:50px;
-}
-
-h1 {
-    font-size: 24px;
-    color: #333;
-}
-
-form {
-    text-align: left;
-}
-
-label {
-    font-weight: bold;
-}
-
-
-input[type="text"] {
-    width: 90%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-input[type="number"] {
-    width: 10%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 20px;
+#toggleTableOfContents {
+    background-color: transparent;
     border: none;
-    border-radius: 5px;
+    padding: 0;
     cursor: pointer;
 }
 
-button:hover {
+#toggleTableOfContents img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#tableOfContents {
+    list-style: none;
+    padding: 10px;
+    margin: 10px 0 0 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#tableOfContents li a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 5px 10px;
+    display: block;
+}
+
+#tableOfContents li a:hover {
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
+/* --- Main Content Container --- */
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+#siteDescription {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 24px;
+    color: #333;
+    font-weight: bold;
+    line-height: 1.6;
+}
+
+/* --- Form Styles --- */
+#transferForm {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#transferForm label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+#transferForm input[type="text"],
+#transferForm input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box; /* Important for 100% width */
+    font-size: 16px;
+}
+
+#transferForm button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+#transferForm button:hover {
     background-color: #0056b3;
 }
 
- #tokenBalance {
-            font-size: 24px;
-            color: #ff9900;
-            background-color: #333;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        
-#siteDescription {
-  text-align: center; /* テキストを中央揃えにする */
-  font-size: 16px; /* フォントサイズを調整 */
-  margin: 10px 0; /* 上下のマージンを追加して文を中央に配置 */
-  color: #333;
+#transferForm button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
 }
 
-
-
-
-
-/* ボタンのスタイル */
-button#toggleTableOfContents {
-    background-color: transparent; /* ボタンの背景色を透明に設定 */
-    border: none; /* ボーダーを削除 */
-    padding: 0; /* パディングをゼロに設定 */
-    margin: 0; /* マージンをゼロに設定 */
+/* --- Token & Transaction Info --- */
+#tokenBalance {
+    font-size: 20px;
+    color: #fff;
+    background-color: #28a745; /* Green for positive balance */
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px 0;
+    font-weight: bold;
 }
-
-/* ボタンのホバースタイル（オプション） */
-button#toggleTableOfContents:hover {
-    /* ホバー時のスタイルを設定 */
-    background-color: transparent; /* ホバー時の背景色を透明に設定 */
-}
-
-/* リンクのテキスト色を赤に設定 */
-/*ul#tableOfContents li a {*/
-/*    color: White;*/
-/*}*/
-
-/* ボタンのスタイルを設定 */
-.button {
-    display: inline-block;
-    padding: 10px 5px; /* パディングを調整してボタンのサイズを変更 */
-    background-color: #ddd; /* ボタンの背景色を設定 */
-    color: #333; /* テキストの色を設定 */
-    text-decoration: none; /* リンクの下線を削除 */
-    border: none; /* ボーダーを削除 */
-    border-radius: 4px; /* 角丸にする */
-    cursor: pointer; /* ボタンカーソルを設定 */
-}
-
-/* ボタンホバー時のスタイルを設定 */
-.button:hover {
-    background-color: #0056b3; /* ホバー時の背景色を変更 */
-}
-
-/* トークンIDを持つ場合の背景スタイル */
-.background-with-token {
-    background-color:#cc9e14 /* トークンIDを持つ場合の背景色 */;
-    color: #cc9e14/* テキストの色 */;
-    /* その他のスタイル設定 */
-}
-
 
 #transactionDetails {
-    margin: 20px;
-    padding: 20px;
-    border: 2px solid #C0C0C0; /* シルバーに変更 */
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 150px; /* 幅を狭く */
-    height: 300px; /* 高さを追加して縦長に */
-    position: absolute; /* 絶対配置 */
-    top: 50%; /* 垂直方向の中央に配置 */
-    left: 3%; /* 左から5%の位置に配置 */
-    transform: translateY(-50%); /* 垂直方向の中央に配置 */
-    writing-mode: vertical-rl; /* 縦書きにする */
-    text-orientation: upright; /* 縦書きで文字を正しい方向に */
-    color: #000; /* フォントカラーを黒に変更 */
-    overflow: hidden; /* オーバーフローを隠す */
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    min-height: 50px;
+    text-align: left;
+    word-wrap: break-word;
 }
 
 #message {
-    font-size: 1em; /* フォントサイズを小さく */
-    font-weight: bold;
-    color: #000; /* フォントカラーを黒に変更 */
-    margin-bottom: 10px;
-}
-
-#transactionDetails a {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #C0C0C0; /* シルバーに変更 */
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-#transactionDetails a:hover {
-    background-color: #A9A9A9; /* 少し濃いシルバーに変更 */
-}
-
-/* メディアクエリを追加してスマホ表示を調整 */
-@media (max-width: 480px) {
-    #transactionDetails {
-        position: static; /* 絶対配置を無効化 */
-        margin: 10px auto; /* 自動的に中央揃え */
-        max-width: 100%; /* 幅を100%に設定 */
-        height: auto; /* 高さを自動調整 */
-        padding: 10px; /* パディングを調整 */
-        writing-mode: horizontal-tb; /* 横書きに変更 */
-        text-orientation: mixed; /* テキスト方向を混在 */
-        background-color: #f9f9f9; /* 背景色を設定 */
-        margin-top: 80px; /* さらに下に配置 */
-        left: -2px; /* 少し左に動かす */
-    }
-
-    #message {
-        font-size: 1em; /* フォントサイズを調整 */
-        color: #000; /* フォントカラーを黒に変更 */
-    }
+    font-size: 14px;
+    font-weight: normal;
+    color: #333;
+    margin: 0;
 }
 
 /* --- New User Guide Styles --- */
@@ -281,10 +178,11 @@ button#toggleTableOfContents:hover {
     border: none;
     cursor: pointer;
     padding: 10px 15px;
-    border-radius: 5px;
+    border-radius: 8px;
     color: white;
     font-size: 14px;
     margin-bottom: 15px;
+    transition: background-color 0.2s ease;
 }
 
 #toggle-guide-button:hover {
@@ -295,7 +193,7 @@ button#toggleTableOfContents:hover {
     text-align: left;
     padding: 15px;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 8px;
     background-color: #f8f9fa;
 }
 
@@ -317,4 +215,27 @@ button#toggleTableOfContents:hover {
 
 #guide-content a:hover {
     text-decoration: underline;
+}
+
+/* --- Utility Classes --- */
+.hidden {
+    display: none;
+}
+
+/* --- Media Queries for Mobile --- */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+        background-attachment: scroll;
+        background-size: contain;
+        background-position: center top;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    #transferForm button {
+        padding: 12px 16px;
+    }
 }
