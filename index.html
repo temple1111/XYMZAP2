@@ -4,61 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Symbol Transfer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="styles.css">
     <script src="https://xembook.github.io/nem2-browserify/symbol-sdk-2.0.4.js"></script>
 </head>
-<body>
+<body class="background-0">
 
-    <div class="main-action-container">
-        <button id="open-drawer-button">筋トレ報酬を獲得する</button>
-    </div>
-
-    <div id="drawer-overlay" class="hidden"></div>
-
-    <div id="transaction-drawer">
-        <button id="close-drawer-button">&times;</button>
-        <div id="main-content-wrapper">
-            <header>
-                <button id="toggleTableOfContents"><img src="XYM.png" alt="Fitness Logo"></button>
-                <ul id="tableOfContents" class="hidden">
-                    <li><a href="https://symbol-community.com/ja/docs/1">ウォレット作成</a></li>
-                    <li><a href="https://ishidad2.github.io/ShareZAP/?address=">ShareZAP</a></li>
-                </ul>
-            </header>
-
-            <div class="container">   
-                <p id="siteDescription">あなたのSYMBOLアドレスと筋トレ回数を入力し、<br>「筋トレ報酬獲得」ボタンを押すとトランザクションが発生し、<br>筋トレ回数に応じたメッセージとKINNIKU-TOKENが贈られます。</p>
+    <div class="d-flex justify-content-center align-items:center min-vh-100 p-3">
+        <div class="card glass-card" style="width: 100%; max-width: 550px;">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">筋トレ報酬獲得</h3>
+                <p id="siteDescription" class="text-center text-muted mb-4">あなたのSYMBOLアドレスと筋トレ回数を入力し、報酬獲得ボタンを押してください。</p>
                 
                 <form id="transferForm">
-                    <label for="recipientAddress">受信者のSYMBOLアドレス</label>
-                    <input type="text" id="recipientAddress" name="recipientAddress" required>
-                    
-                    <label for="amount">筋トレ回数:</label>
-                    <input type="number" id="amount" name="amount" required>
-                    
-                    <button type="button" onclick="createAndSendTransaction()">報酬を獲得</button>
+                    <div class="mb-3">
+                        <label for="recipientAddress" class="form-label">受信者のSYMBOLアドレス</label>
+                        <input type="text" class="form-control" id="recipientAddress" name="recipientAddress" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">筋トレ回数</label>
+                        <input type="number" class="form-control" id="amount" name="amount" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary btn-lg" onclick="createAndSendTransaction()">報酬を獲得</button>
+                    </div>
                 </form>
 
-                <div class="new-user-guide">
-                    <button id="toggle-guide-button">Symbolアドレスをお持ちでない方はこちら</button>
-                    <div id="guide-content" class="hidden">
-                        <h4>KINNIKU-TOKENを受け取るには？</h4>
-                        <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。</p>
-                        <p>これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
-                        <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
-                        <p>作成は数分で完了します！</p>
+                <hr class="my-4">
+
+                <div class="accordion" id="newUserAccordion">
+                    <div class="accordion-item glass-card">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                Symbolアドレスをお持ちでない方はこちら
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#newUserAccordion">
+                            <div class="accordion-body">
+                                <strong>KINNIKU-TOKENを受け取るには？</strong>
+                                <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
+                                <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
+                                <p class="mt-2">作成は数分で完了します！</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <p id="tokenBalance">保有トークン数量: 0 KINNIKU-TOKEN</p>
+                <div id="tokenBalance" class="alert alert-info mt-4 text-center fw-bold" role="alert">
+                    保有トークン数量: 0 KINNIKU-TOKEN
+                </div>
             
-                <div id="transactionDetails">
-                    <p id="message">message: </p>
+                <div id="transactionDetails" class="alert alert-success mt-3 d-none" role="alert">
+                    <p id="message" class="mb-0">message: </p>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         // --- Frontend Logic ---
         const NODE = 'https://xym.jp1.node.leywapool.com:3001';
@@ -83,7 +86,7 @@
 
             const button = document.querySelector('#transferForm button');
             button.disabled = true;
-            button.textContent = '処理中...';
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 処理中...';
 
             try {
                 const response = await fetch('/api/send-transaction', {
@@ -98,10 +101,11 @@
                 });
 
                 const data = await response.json();
+                const transactionDetails = document.getElementById('transactionDetails');
 
                 if (response.ok) {
-                    alert("トランザクションが正常に送信されました！");
                     document.getElementById('message').textContent = `message: ${data.transactionMessage}`;
+                    transactionDetails.classList.remove('d-none');
                     getAndDisplayTokenBalance(recipientAddressValue);
                 } else {
                     throw new Error(data.message || '不明なエラーが発生しました。');
@@ -129,7 +133,7 @@
                 const tokenBalanceElement = document.getElementById('tokenBalance');
                 const bodyElement = document.body;
                 
-                bodyElement.className = '';
+                bodyElement.className = 'background-0'; // Reset class
 
                 if (tokenBalance) {
                     const tokenCount = tokenBalance.amount.compact();
@@ -157,53 +161,11 @@
             }
         }
 
-        function updateBackground() {
-            const recipientAddress = document.getElementById('recipientAddress').value;
-            getAndDisplayTokenBalance(recipientAddress);
-        }
-
         // --- Event Listeners ---
         window.addEventListener('load', function () {
-            // Background update logic
-            updateBackground();
             const recipientAddressInput = document.getElementById('recipientAddress');
             if(recipientAddressInput) {
-                recipientAddressInput.addEventListener('input', updateBackground);
-            }
-
-            // Drawer logic
-            const openDrawerButton = document.getElementById('open-drawer-button');
-            const closeDrawerButton = document.getElementById('close-drawer-button');
-            const drawer = document.getElementById('transaction-drawer');
-            const overlay = document.getElementById('drawer-overlay');
-
-            const openDrawer = () => {
-                drawer.classList.add('is-open');
-                overlay.classList.remove('hidden');
-            };
-
-            const closeDrawer = () => {
-                drawer.classList.remove('is-open');
-                overlay.classList.add('hidden');
-            };
-
-            openDrawerButton.addEventListener('click', openDrawer);
-            closeDrawerButton.addEventListener('click', closeDrawer);
-            overlay.addEventListener('click', closeDrawer);
-
-            // Other toggle logic
-            const toggleTableButton = document.getElementById('toggleTableOfContents');
-            if(toggleTableButton) {
-                toggleTableButton.addEventListener('click', function() {
-                    document.getElementById('tableOfContents').classList.toggle('hidden');
-                });
-            }
-
-            const toggleGuideButton = document.getElementById('toggle-guide-button');
-            if(toggleGuideButton) {
-                toggleGuideButton.addEventListener('click', function() {
-                    document.getElementById('guide-content').classList.toggle('hidden');
-                });
+                recipientAddressInput.addEventListener('input', () => getAndDisplayTokenBalance(recipientAddressInput.value));
             }
         });
     </script>
