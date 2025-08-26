@@ -59,33 +59,35 @@
                     </div>
                 </form>
 
-                <hr class="my-4">
+                
+            </div>
+        </div>
+    </div>
 
-                <div class="accordion" id="newUserAccordion">
-                    <div class="accordion-item glass-card">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                使い方・ウォレット作成について
-                            </button>
-                        </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#newUserAccordion">
-                            <div class="accordion-body">
-                                <h4>KINNIKU-TOKEN CHALLENGEへようこそ！</h4>
-                                <p>このアプリは、あなたの筋力トレーニングの努力を「KINNIKU-TOKEN」として報酬に変え、モチベーションを最大限に引き出すためのものです。</p>
-                                <h5>アプリの使い方</h5>
-                                <ol>
-                                    <li>「チャレンジに参加する」ボタンから、あなたのSymbolアドレスと筋トレ回数を入力します。</li>
-                                    <li>「報酬を獲得」ボタンを押すと、入力した筋トレ回数に応じたKINNIKU-TOKENがあなたのウォレットに送られます。</li>
-                                    <li>保有トークン数に応じて、あなたのレベルが上がり、背景も変化します。マッスルマスターを目指しましょう！</li>
-                                    <li>AIトレーナーからの熱いメッセージで、さらなるモチベーションアップ！</li>
-                                </ol>
-                                <h5>KINNIKU-TOKENを受け取るには？</h5>
-                                <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
-                                <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
-                                <p class="mt-2">作成は数分で完了します！</p>
-                            </div>
-                        </div>
-                    </div>
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">使い方・ウォレット作成について</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>KINNIKU-TOKEN CHALLENGEへようこそ！</h4>
+                    <p>このアプリは、あなたの筋力トレーニングの努力を「KINNIKU-TOKEN」として報酬に変え、モチベーションを最大限に引き出すためのものです。</p>
+                    <h5>アプリの使い方</h5>
+                    <ol>
+                        <li>「チャレンジに参加する」ボタンから、あなたのSymbolアドレスと筋トレ回数を入力します。</li>
+                        <li>「報酬を獲得」ボタンを押すと、入力した筋トレ回数に応じたKINNIKU-TOKENがあなたのウォレットに送られます。</li>
+                        <li>保有トークン数に応じて、あなたのレベルが上がり、背景も変化します。マッスルマスターを目指しましょう！</li>
+                        <li>AIトレーナーからの熱いメッセージで、さらなるモチベーションアップ！</li>
+                    </ol>
+                    <h5>KINNIKU-TOKENを受け取るには？</h5>
+                    <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
+                    <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
+                    <p class="mt-2">作成は数分で完了します！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
                 </div>
             </div>
         </div>
@@ -272,13 +274,14 @@
             const openInfoButton = document.getElementById('open-info-button');
             if (openInfoButton) {
                 openInfoButton.addEventListener('click', () => {
-                    openDrawer(); // ドロワーを開く
-                    const collapseElement = document.getElementById('collapseOne');
-                    const bsCollapse = new bootstrap.Collapse(collapseElement, { toggle: false });
-                    bsCollapse.show(); // アコーディオンを開く
+                    const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+                    infoModal.show();
                 });
             }
         });
     </script>
+    <footer class="text-center text-white-50 mt-5 mb-3" style="font-size: 0.8em;">
+        <p>&copy; 2025 XYMZAP. All rights reserved.</p>
+    </footer>
 </body>
 </html>
