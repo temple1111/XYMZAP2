@@ -195,9 +195,9 @@ footer {
 
 /* --- Open Info Button Styles --- */
 #open-info-button {
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: bold;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 50px; /* 丸み */
     border: 2px solid white;
     background-color: rgba(0, 0, 0, 0.4);
