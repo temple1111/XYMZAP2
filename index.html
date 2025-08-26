@@ -8,44 +8,48 @@
     <script src="https://xembook.github.io/nem2-browserify/symbol-sdk-2.0.4.js"></script>
 </head>
 <body>
-    <header>
-        <button id="toggleTableOfContents"><img src="XYM.png" alt="Fitness Logo"></button>
-        <ul id="tableOfContents" class="hidden">
-            <li><a href="https://symbol-community.com/ja/docs/1">ウォレット作成</a></li>
-            <li><a href="https://ishidad2.github.io/ShareZAP/?address=">ShareZAP</a></li>
-        </ul>
-    </header>
+    <div id="main-content-wrapper">
+        <header>
+            <button id="toggleTableOfContents"><img src="XYM.png" alt="Fitness Logo"></button>
+            <ul id="tableOfContents" class="hidden">
+                <li><a href="https://symbol-community.com/ja/docs/1">ウォレット作成</a></li>
+                <li><a href="https://ishidad2.github.io/ShareZAP/?address=">ShareZAP</a></li>
+            </ul>
+        </header>
 
-    <div class="container">   
-        <p id="siteDescription">こちらのサイトは筋トレを促す特別な場所です。<br>あなたのSYMBOLアドレスと筋トレ回数を入力し、<br>「筋トレ報酬獲得」ボタンを押すとトランザクションが発生し、<br>筋トレ回数に応じたメッセージとKINNIKU-TOKENが贈られます。</p>
+        <div class="container">   
+            <p id="siteDescription">こちらのサイトは筋トレを促す特別な場所です。<br>あなたのSYMBOLアドレスと筋トレ回数を入力し、<br>「筋トレ報酬獲得」ボタンを押すとトランザクションが発生し、<br>筋トレ回数に応じたメッセージとKINNIKU-TOKENが贈られます。</p>
+            
+            <form id="transferForm">
+                <label for="recipientAddress">受信者のSYMBOLアドレス</label>
+                <input type="text" id="recipientAddress" name="recipientAddress" required>
+                
+                <label for="amount">筋トレ回数:</label>
+                <input type="number" id="amount" name="amount" required>
+                
+                <button type="button" onclick="createAndSendTransaction()">筋トレ報酬を獲得</button>
+            </form>
+
+            <div class="new-user-guide">
+                <button id="toggle-guide-button">Symbolアドレスをお持ちでない方はこちら</button>
+                <div id="guide-content" class="hidden">
+                    <h4>KINNIKU-TOKENを受け取るには？</h4>
+                    <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。</p>
+                    <p>これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
+                    <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
+                    <p>作成は数分で完了します！</p>
+                </div>
+            </div>
+
+            <p id="tokenBalance">保有トークン数量: 0 KINNIKU-TOKEN</p>
         
-        <form id="transferForm">
-            <label for="recipientAddress">受信者のSYMBOLアドレス</label>
-            <input type="text" id="recipientAddress" name="recipientAddress" required>
-            
-            <label for="amount">筋トレ回数:</label>
-            <input type="number" id="amount" name="amount" required>
-            
-            <button type="button" onclick="createAndSendTransaction()">筋トレ報酬を獲得</button>
-        </form>
-
-        <div class="new-user-guide">
-            <button id="toggle-guide-button">Symbolアドレスをお持ちでない方はこちら</button>
-            <div id="guide-content" class="hidden">
-                <h4>KINNIKU-TOKENを受け取るには？</h4>
-                <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。</p>
-                <p>これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
-                <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
-                <p>作成は数分で完了します！</p>
+            <div id="transactionDetails">
+                <p id="message">message: </p>
             </div>
         </div>
-
-        <p id="tokenBalance">保有トークン数量: 0 KINNIKU-TOKEN</p>
-    
-        <div id="transactionDetails">
-            <p id="message">message: </p>
-        </div>
     </div>
+
+    <button id="peek-button">👁️</button>
 
     <script>
         // --- Frontend Logic ---
@@ -151,7 +155,7 @@
         }
 
         // --- Event Listeners ---
-        window.onload = function () {
+        window.addEventListener('load', function () {
             // Background update logic
             updateBackground();
             document.getElementById('recipientAddress').addEventListener('input', updateBackground);
@@ -165,7 +169,20 @@
             document.getElementById('toggle-guide-button').addEventListener('click', function() {
                 document.getElementById('guide-content').classList.toggle('hidden');
             });
-        };
+
+            // Peek button logic
+            const peekButton = document.getElementById('peek-button');
+            const contentWrapper = document.getElementById('main-content-wrapper');
+
+            const hideContent = () => contentWrapper.classList.add('fade-out');
+            const showContent = () => contentWrapper.classList.remove('fade-out');
+
+            peekButton.addEventListener('mousedown', hideContent);
+            peekButton.addEventListener('mouseup', showContent);
+            peekButton.addEventListener('mouseleave', showContent);
+            peekButton.addEventListener('touchstart', hideContent, { passive: true });
+            peekButton.addEventListener('touchend', showContent);
+        });
     </script>
 </body>
 </html>
