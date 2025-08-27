@@ -11,12 +11,14 @@
     </filter>
     <linearGradient id="platinumMetal" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#E5E4E2"/>
-      <stop offset="50%" stop-color="#D3D3D3"/>
+      <stop offset="25%" stop-color="#D3D3D3"/>
+      <stop offset="50%" stop-color="#E5E4E2"/>
+      <stop offset="75%" stop-color="#D3D3D3"/>
       <stop offset="100%" stop-color="#E5E4E2"/>
     </linearGradient>
   </defs>
-  <g filter="url(#emboss)">
-    <circle cx="50" cy="50" r="45" fill="url(#platinumMetal)"/>
+  <g transform-origin="50 50">
+    <circle cx="50" cy="50" r="45" fill="url(#platinumMetal)" filter="url(#emboss)"/>
     <circle cx="50" cy="50" r="40" fill="#E5E4E2" stroke="#D3D3D3" stroke-width="2"/>
     <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333" font-weight="bold">レジェンド</text>
   </g>
