@@ -9,13 +9,16 @@
       <feComposite in="specularLighting" in2="SourceAlpha" operator="in" result="specularHighlight"/>
       <feComposite in="SourceGraphic" in2="specularHighlight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
     </filter>
-    <linearGradient id="purpleMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8A2BE2"/>
-      <stop offset="50%" stop-color="#9932CC"/>
-      <stop offset="100%" stop-color="#8A2BE2"/>
+    <linearGradient id="goldMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="50%" stop-color="#DAA520"/>
+      <stop offset="100%" stop-color="#FFD700"/>
     </linearGradient>
   </defs>
-  <path d="M50 0 L75 15 L100 50 L75 85 L50 100 L25 85 L0 50 L25 15 Z" fill="url(#purpleMetal)" filter="url(#emboss)"/>
-  <circle cx="50" cy="50" r="15" fill="#FFD700" stroke="#fff" stroke-width="2"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4B0082" font-weight="bold">神の領域</text>
+  <g filter="url(#emboss)">
+    <circle cx="50" cy="50" r="45" fill="url(#goldMetal)"/>
+    <circle cx="50" cy="50" r="40" fill="#FFD700" stroke="#DAA520" stroke-width="2"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333" font-weight="bold">神の領域</text>
+  </g>
+  <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="10s" repeatCount="indefinite"/>
 </svg>

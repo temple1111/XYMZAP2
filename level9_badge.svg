@@ -9,13 +9,16 @@
       <feComposite in="specularLighting" in2="SourceAlpha" operator="in" result="specularHighlight"/>
       <feComposite in="SourceGraphic" in2="specularHighlight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
     </filter>
-    <linearGradient id="orangeRedMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF4500"/>
-      <stop offset="50%" stop-color="#FF6347"/>
-      <stop offset="100%" stop-color="#FF4500"/>
+    <linearGradient id="platinumMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5E4E2"/>
+      <stop offset="50%" stop-color="#D3D3D3"/>
+      <stop offset="100%" stop-color="#E5E4E2"/>
     </linearGradient>
   </defs>
-  <path d="M50 0 L75 15 L100 50 L75 85 L50 100 L25 85 L0 50 L25 15 Z" fill="url(#orangeRedMetal)" filter="url(#emboss)"/>
-  <circle cx="50" cy="50" r="15" fill="#FFD700" stroke="#fff" stroke-width="2"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4B0082" font-weight="bold">レジェンド</text>
+  <g filter="url(#emboss)">
+    <circle cx="50" cy="50" r="45" fill="url(#platinumMetal)"/>
+    <circle cx="50" cy="50" r="40" fill="#E5E4E2" stroke="#D3D3D3" stroke-width="2"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333" font-weight="bold">レジェンド</text>
+  </g>
+  <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="10s" repeatCount="indefinite"/>
 </svg>

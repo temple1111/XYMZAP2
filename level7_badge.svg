@@ -9,12 +9,16 @@
       <feComposite in="specularLighting" in2="SourceAlpha" operator="in" result="specularHighlight"/>
       <feComposite in="SourceGraphic" in2="specularHighlight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
     </filter>
-    <linearGradient id="steelBlueMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4682B4"/>
-      <stop offset="50%" stop-color="#5F9EA0"/>
-      <stop offset="100%" stop-color="#4682B4"/>
+    <linearGradient id="goldMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="50%" stop-color="#DAA520"/>
+      <stop offset="100%" stop-color="#FFD700"/>
     </linearGradient>
   </defs>
-  <path d="M50 0 L70 20 L100 25 L80 50 L100 75 L70 80 L50 100 L30 80 L0 75 L20 50 L0 25 L30 20 Z" fill="url(#steelBlueMetal)" filter="url(#emboss)"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#fff" font-weight="bold">鋼の肉体</text>
+  <g filter="url(#emboss)">
+    <circle cx="50" cy="50" r="45" fill="url(#goldMetal)"/>
+    <circle cx="50" cy="50" r="40" fill="#FFD700" stroke="#DAA520" stroke-width="2"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333" font-weight="bold">鋼の肉体</text>
+  </g>
+  <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="10s" repeatCount="indefinite"/>
 </svg>

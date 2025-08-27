@@ -9,12 +9,16 @@
       <feComposite in="specularLighting" in2="SourceAlpha" operator="in" result="specularHighlight"/>
       <feComposite in="SourceGraphic" in2="specularHighlight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
     </filter>
-    <linearGradient id="grayMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#E0E0E0"/>
-      <stop offset="50%" stop-color="#B0B0B0"/>
-      <stop offset="100%" stop-color="#E0E0E0"/>
+    <linearGradient id="bronzeMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CD7F32"/>
+      <stop offset="50%" stop-color="#B87333"/>
+      <stop offset="100%" stop-color="#CD7F32"/>
     </linearGradient>
   </defs>
-  <circle cx="50" cy="50" r="45" fill="url(#grayMetal)" filter="url(#emboss)"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333" font-weight="bold">ビギナー</text>
+  <g filter="url(#emboss)">
+    <circle cx="50" cy="50" r="45" fill="url(#bronzeMetal)"/>
+    <circle cx="50" cy="50" r="40" fill="#CD7F32" stroke="#B87333" stroke-width="2"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#fff" font-weight="bold">ビギナー</text>
+  </g>
+  <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="10s" repeatCount="indefinite"/>
 </svg>

@@ -15,6 +15,10 @@
       <stop offset="100%" stop-color="#C0C0C0"/>
     </linearGradient>
   </defs>
-  <path d="M50 5 L65 35 L95 40 L75 65 L80 95 L50 80 L20 95 L25 65 L5 40 L35 35 Z" fill="url(#silverMetal)" filter="url(#emboss)"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#4B0082" font-weight="bold">ベテラントレーニー</text>
+  <g filter="url(#emboss)">
+    <circle cx="50" cy="50" r="45" fill="url(#silverMetal)"/>
+    <circle cx="50" cy="50" r="40" fill="#C0C0C0" stroke="#A9A9A9" stroke-width="2"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333" font-weight="bold">ベテラントレーニー</text>
+  </g>
+  <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="10s" repeatCount="indefinite"/>
 </svg>

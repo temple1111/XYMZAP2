@@ -9,13 +9,16 @@
       <feComposite in="specularLighting" in2="SourceAlpha" operator="in" result="specularHighlight"/>
       <feComposite in="SourceGraphic" in2="specularHighlight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
     </filter>
-    <linearGradient id="crimsonMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#DC143C"/>
-      <stop offset="50%" stop-color="#FF6347"/>
-      <stop offset="100%" stop-color="#DC143C"/>
+    <linearGradient id="blackMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#333333"/>
+      <stop offset="50%" stop-color="#000000"/>
+      <stop offset="100%" stop-color="#333333"/>
     </linearGradient>
   </defs>
-  <path d="M50 0 L80 10 L100 40 L90 70 L60 100 L40 100 L10 70 L0 40 L20 10 Z" fill="url(#crimsonMetal)" filter="url(#emboss)"/>
-  <circle cx="50" cy="50" r="20" fill="#FFD700" stroke="#fff" stroke-width="3"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4B0082" font-weight="bold">マッスルマスター</text>
+  <g filter="url(#emboss)">
+    <circle cx="50" cy="50" r="45" fill="url(#blackMetal)"/>
+    <circle cx="50" cy="50" r="40" fill="#333333" stroke="#000000" stroke-width="2"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#fff" font-weight="bold">マッスルマスター</text>
+  </g>
+  <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="10s" repeatCount="indefinite"/>
 </svg>
