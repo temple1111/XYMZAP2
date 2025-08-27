@@ -171,10 +171,17 @@
 
         async function createAndSendTransaction() {
             const recipientAddressValue = document.getElementById('recipientAddress').value;
-            const amountValue = document.getElementById('amount').value;
+            const amountValue = parseInt(document.getElementById('amount').value); // amountValue を数値として取得
 
-            if (!recipientAddressValue || !amountValue || amountValue <= 0) {
+            if (!recipientAddressValue || isNaN(amountValue) || amountValue <= 0) { // isNaN を追加
                 alert("受信者のSYMBOLアドレスと筋トレ回数を正しく入力してください。");
+                return;
+            }
+
+            // 新しい上限チェックを追加
+            const MAX_REPS_PER_DAY = 2000; // 例: 1日の最大筋トレ回数を2000回に設定
+            if (amountValue > MAX_REPS_PER_DAY) {
+                alert(`1日の筋トレ回数は${MAX_REPS_PER_DAY}回までです。無理は禁物！`);
                 return;
             }
 
