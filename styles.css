@@ -2,6 +2,7 @@
 
 /* --- General Body & Background --- */
 body {
+    background-color: #000; /* スマホでの白い余白対策 */
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
