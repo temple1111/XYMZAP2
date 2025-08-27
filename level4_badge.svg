@@ -1,4 +1,13 @@
 <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="50" r="45" fill="#c0c0c0" stroke="#333" stroke-width="2"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#fff" font-weight="bold">ベテラントレーニー</text>
+  <defs>
+    <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C0C0C0"/>
+      <stop offset="100%" stop-color="#A9A9A9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="3" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <path d="M50 5 L65 35 L95 40 L75 65 L80 95 L50 80 L20 95 L25 65 L5 40 L35 35 Z" fill="url(#silverGradient)" filter="url(#shadow)"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#4B0082" font-weight="bold">ベテラントレーニー</text>
 </svg>

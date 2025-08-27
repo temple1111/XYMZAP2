@@ -33,6 +33,9 @@
                 <!-- Progress Bar / Level System -->
                 <div class="mb-3">
                     <p class="text-center mb-1 fw-bold" id="levelDisplay">レベル: ビギナー (0%)</p>
+                    <div class="text-center mb-2">
+                        <img id="currentLevelBadge" src="level0_badge.svg" alt="現在のレベルバッジ" class="img-fluid" style="max-width: 80px;">
+                    </div>
                     <div class="progress" role="progressbar" aria-label="Level Progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-bar bg-success" style="width: 0%"></div>
                     </div>
@@ -280,6 +283,9 @@
                     const levelName = LEVEL_NAMES[currentLevelIndex];
                     document.getElementById('levelDisplay').textContent = `レベル: ${levelName} (${Math.floor(progressPercentage)}%)`;
                     document.querySelector('.progress-bar').style.width = `${progressPercentage}%`;
+
+                    // バッジ画像の更新
+                    document.getElementById('currentLevelBadge').src = `level${currentLevelIndex}_badge.svg`;
                     
                 } else {
                     tokenBalanceElement.textContent = 'トークンを保有していません';
@@ -287,6 +293,8 @@
                     // トークンがない場合もレベル表示をリセット
                     document.getElementById('levelDisplay').textContent = `レベル: ビギナー (0%)`;
                     document.querySelector('.progress-bar').style.width = `0%`;
+                    // バッジもリセット
+                    document.getElementById('currentLevelBadge').src = `level0_badge.svg`;
                 }
             } catch (error) {
                 console.error(error);

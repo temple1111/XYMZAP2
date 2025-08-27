@@ -1,4 +1,14 @@
 <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="50" r="45" fill="#dc143c" stroke="#333" stroke-width="2"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#fff" font-weight="bold">マッスルマスター</text>
+  <defs>
+    <linearGradient id="crimsonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DC143C"/>
+      <stop offset="100%" stop-color="#FF6347"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="6" dy="6" stdDeviation="7" flood-color="#000" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+  <path d="M50 0 L80 10 L100 40 L90 70 L60 100 L40 100 L10 70 L0 40 L20 10 Z" fill="url(#crimsonGradient)" filter="url(#shadow)"/>
+  <circle cx="50" cy="50" r="20" fill="#FFD700" stroke="#fff" stroke-width="3"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4B0082" font-weight="bold">マッスルマスター</text>
 </svg>
