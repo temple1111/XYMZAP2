@@ -85,6 +85,65 @@
                     <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
                     <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
                     <p class="mt-2">作成は数分で完了します！</p>
+                    <h5 class="mt-4">レベルバッジ</h5>
+                    <p>あなたの筋トレの成果は、特別なバッジとして称えられます。保有トークン数に応じて、以下のバッジを獲得できます。</p>
+                    <div class="badge-list row">
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level0_badge.svg" alt="ビギナーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>ビギナー</strong></p>
+                            <small>0 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level1_badge.svg" alt="ルーキーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>ルーキー</strong></p>
+                            <small>1,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level2_badge.svg" alt="マッスル見習いバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>マッスル見習い</strong></p>
+                            <small>2,500 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level3_badge.svg" alt="中級マッスルバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>中級マッスル</strong></p>
+                            <small>5,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level4_badge.svg" alt="ベテラントレーニーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>ベテラントレーニー</strong></p>
+                            <small>10,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level5_badge.svg" alt="プロビルダーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>プロビルダー</strong></p>
+                            <small>15,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level6_badge.svg" alt="筋肉の賢者バッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>筋肉の賢者</strong></p>
+                            <small>25,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level7_badge.svg" alt="鋼の肉体バッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>鋼の肉体</strong></p>
+                            <small>37,500 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level8_badge.svg" alt="神の領域バッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>神の領域</strong></p>
+                            <small>50,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level9_badge.svg" alt="レジェンドバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>レジェンド</strong></p>
+                            <small>75,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level10_badge.svg" alt="マッスルマスターバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>マッスルマスター</strong></p>
+                            <small>100,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
@@ -101,7 +160,7 @@
         const repo = new sym.RepositoryFactoryHttp(NODE);
 
         // Level thresholds and names
-        const LEVEL_THRESHOLDS = [0, 200, 500, 1000, 2000, 3000, 5000, 7500, 10000, 15000, 20000];
+        const LEVEL_THRESHOLDS = [0, 1000, 2500, 5000, 10000, 15000, 25000, 37500, 50000, 75000, 100000];
         const LEVEL_NAMES = [
             "ビギナー", "ルーキー", "マッスル見習い", "中級マッスル", "ベテラントレーニー",
             "プロビルダー", "筋肉の賢者", "鋼の肉体", "神の領域", "レジェンド", "マッスルマスター"
