@@ -1,5 +1,5 @@
 const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = require('symbol-sdk');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google-generative-ai');
 
 // --- Symbol-related constants ---
 const NODE = 'https://xym.jp1.node.leywapool.com:3001';
@@ -17,13 +17,21 @@ if (!GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+// --- Rate Limiting Constants ---
+const MAX_REQUESTS_PER_MINUTE = 5; // 1分間に許可する最大リクエスト数
+const WINDOW_SIZE_MS = 60 * 1000; // 1分間 (ミリ秒)
+const MAX_REPS_SERVER_SIDE = 2000; // サーバーサイドでの1回あたりの最大筋トレ回数
+
+// --- Request History (in-memory) ---
+const requestHistory = {}; // { "ip_address_or_symbol_address": [timestamp1, timestamp2, ...] }
+
 /**
  * Generates a motivational message using the Gemini API based on the number of reps.
  * @param {number} amount The number of workout repetitions.
  * @returns {Promise<string>} A motivational message.
  */
 async function generateTransactionMessage(amount) {
-        const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、筋力トレーニングを終えました。トレーニング回数は${amount}回です。この回数を見て、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。例：「その1回が筋肉をデカくする！」「昨日の自分を超えたな！」`;
+    const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、筋力トレーニングを終えました。トレーニング回数は${amount}回です。この回数を見て、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。例：「その1回が筋肉をデカくする！」「昨日の自分を超えたな！」`;
 
     try {
         const result = await geminiModel.generateContent(prompt);
@@ -51,6 +59,36 @@ module.exports = async (req, res) => {
     if (!recipientAddress || !amount || amount <= 0) {
         return res.status(400).json({ message: 'Invalid input. Please provide a valid address and amount.' });
     }
+
+    // --- サーバーサイドでの不正検知ロジック --- ここから
+    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const now = Date.now();
+
+    // IPアドレスによるレートリミット
+    if (!requestHistory[clientIp]) {
+        requestHistory[clientIp] = [];
+    }
+    requestHistory[clientIp] = requestHistory[clientIp].filter(timestamp => now - timestamp < WINDOW_SIZE_MS);
+    if (requestHistory[clientIp].length >= MAX_REQUESTS_PER_MINUTE) {
+        return res.status(429).json({ message: '短時間でのリクエストが多すぎます。しばらくお待ちください。' });
+    }
+    requestHistory[clientIp].push(now);
+
+    // Symbolアドレスによるレートリミット
+    if (!requestHistory[recipientAddress]) {
+        requestHistory[recipientAddress] = [];
+    }
+    requestHistory[recipientAddress] = requestHistory[recipientAddress].filter(timestamp => now - timestamp < WINDOW_SIZE_MS);
+    if (requestHistory[recipientAddress].length >= MAX_REQUESTS_PER_MINUTE) {
+        return res.status(429).json({ message: 'このSymbolアドレスからのリクエストが多すぎます。しばらくお待ちください。' });
+    }
+    requestHistory[recipientAddress].push(now);
+
+    // 異常な筋トレ回数のサーバーサイドチェック
+    if (amount > MAX_REPS_SERVER_SIDE) {
+        return res.status(400).json({ message: `1回の筋トレ回数は${MAX_REPS_SERVER_SIDE}回までです。不正な入力はできません。` });
+    }
+    // --- サーバーサイドでの不正検知ロジック --- ここまで
 
     try {
         // Generate the message first
