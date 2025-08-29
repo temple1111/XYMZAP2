@@ -373,14 +373,15 @@
                 const badgeY = padding;
                 ctx.drawImage(badgeImage, badgeX, badgeY, badgeSize, badgeSize);
 
-                // 2. Level Text (Smaller, under badge)
+                // 2. Level Text (Smaller, under badge, right-aligned)
                 ctx.fillStyle = 'white';
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
                 ctx.shadowBlur = 10;
-                ctx.textAlign = 'center';
-                ctx.font = `bold ${canvas.width * 0.025}px sans-serif`; // Smaller font
-                const levelTextY = badgeY + badgeSize + 40; // Position under badge
-                ctx.fillText(levelText, badgeX + (badgeSize / 2), levelTextY);
+                ctx.textAlign = 'right'; // Change to right alignment
+                ctx.font = `bold ${canvas.width * 0.025}px sans-serif`;
+                const levelTextY = badgeY + badgeSize + 40;
+                const levelTextX = badgeX + badgeSize; // Align to the right edge of the badge
+                ctx.fillText(levelText, levelTextX, levelTextY);
 
                 // 3. AI Message (Lower down, left-aligned)
                 ctx.textAlign = 'left';
