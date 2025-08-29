@@ -362,36 +362,39 @@
                 canvas.height = bgImage.naturalHeight;
                 ctx.drawImage(bgImage, 0, 0);
 
-                // --- New "Cool" Layout ---
+                // --- Final "Cooler" Layout ---
 
                 const padding = canvas.width * 0.05;
 
-                // 1. Badge (Smaller, Top-Right)
+                // 1. Badge (Top-Right)
                 const badgeImage = await loadImage(badgeSrc);
-                const badgeSize = canvas.width * 0.1; // Roughly 1/4 of original 0.25
-                ctx.drawImage(badgeImage, canvas.width - badgeSize - padding, padding, badgeSize, badgeSize);
+                const badgeSize = canvas.width * 0.1;
+                const badgeX = canvas.width - badgeSize - padding;
+                const badgeY = padding;
+                ctx.drawImage(badgeImage, badgeX, badgeY, badgeSize, badgeSize);
 
-                // 2. Level Text (Top-Left)
+                // 2. Level Text (Smaller, under badge)
                 ctx.fillStyle = 'white';
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-                ctx.shadowBlur = 12;
-                ctx.textAlign = 'left';
-                ctx.font = `bold ${canvas.width * 0.045}px sans-serif`;
-                ctx.fillText(levelText, padding, padding + (badgeSize / 2));
+                ctx.shadowBlur = 10;
+                ctx.textAlign = 'center';
+                ctx.font = `bold ${canvas.width * 0.025}px sans-serif`; // Smaller font
+                const levelTextY = badgeY + badgeSize + 40; // Position under badge
+                ctx.fillText(levelText, badgeX + (badgeSize / 2), levelTextY);
 
-                // 3. AI Message (Smaller, below header, left-aligned)
-                ctx.font = `${canvas.width * 0.025}px sans-serif`; // Roughly 1/4 font size
+                // 3. AI Message (Lower down, left-aligned)
+                ctx.textAlign = 'left';
+                ctx.font = `${canvas.width * 0.025}px sans-serif`;
                 const maxWidth = canvas.width - (padding * 2);
                 const lineHeight = canvas.width * 0.04;
-                const startY = padding + badgeSize + (padding * 1.5);
+                const startY = levelTextY + 80; // Position further down
                 
-                // Reset shadow for main text for better readability
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 8;
                 
                 wrapText(ctx, aiMessage, padding, startY, maxWidth, lineHeight);
 
-                // --- End of New Layout ---
+                // --- End of Layout ---
 
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], 'workout-result.png', { type: 'image/png' });
