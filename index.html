@@ -62,10 +62,14 @@
                     </div>
                 </form>
 
-                
+                <div class="d-grid mt-3">
+                    <button id="shareButton" class="btn btn-success btn-lg" style="display: none;">結果をSNSで共有</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <canvas id="shareCanvas" width="1080" height="1080" style="display: none;"></canvas>
 
     <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -222,6 +226,7 @@
                     }
                     transactionDetails.classList.remove('d-none');
                     getAndDisplayTokenBalance(recipientAddressValue);
+                    document.getElementById('shareButton').style.display = 'block';
                 } else {
                     throw new Error(data.message || '不明なエラーが発生しました。');
                 }
@@ -310,6 +315,106 @@
             }
         }
 
+        async function shareOnSns() {
+            const canvas = document.getElementById('shareCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas before drawing
+
+            // 1. Get Data
+            const levelText = document.getElementById('levelDisplay').textContent;
+            const aiMessage = document.getElementById('message').textContent.replace('message: ', '');
+            const badgeSrc = document.getElementById('currentLevelBadge').src;
+            const bodyClass = document.body.className;
+            const backgroundMatch = bodyClass.match(/background-(\d+)/);
+            const backgroundIndex = backgroundMatch ? backgroundMatch[1] : '0';
+            
+            const backgroundImageSrc = `${backgroundIndex}.png`;
+
+            const loadImage = src => new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.crossOrigin = "anonymous";
+                img.src = src;
+            });
+            
+            const wrapText = (context, text, x, y, maxWidth, lineHeight) => {
+                const words = text.split('');
+                let line = '';
+                for(let n = 0; n < words.length; n++) {
+                    let testLine = line + words[n];
+                    let metrics = context.measureText(testLine);
+                    let testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        context.fillText(line, x, y);
+                        line = words[n];
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                context.fillText(line, x, y);
+            };
+
+            try {
+                const bgImage = await loadImage(backgroundImageSrc);
+                // Use background image's natural dimensions for the canvas
+                canvas.width = bgImage.naturalWidth;
+                canvas.height = bgImage.naturalHeight;
+                ctx.drawImage(bgImage, 0, 0);
+
+                const badgeImage = await loadImage(badgeSrc);
+                // Draw badge centered, adjust size as needed
+                const badgeSize = canvas.width * 0.25;
+                ctx.drawImage(badgeImage, canvas.width / 2 - badgeSize / 2, 150, badgeSize, badgeSize);
+
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowBlur = 10;
+                
+                ctx.font = `bold ${canvas.width * 0.05}px sans-serif`;
+                ctx.fillText(levelText, canvas.width / 2, 150 + badgeSize + 80);
+
+                ctx.font = `${canvas.width * 0.035}px sans-serif`;
+                const maxWidth = canvas.width - 100;
+                const lineHeight = canvas.width * 0.05;
+                const startY = 150 + badgeSize + 80 + 100;
+                wrapText(ctx, aiMessage, canvas.width / 2, startY, maxWidth, lineHeight);
+
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'workout-result.png', { type: 'image/png' });
+                    const shareData = {
+                        files: [file],
+                        title: '筋トレチャレンジ結果！',
+                        text: '今日の筋トレの成果を見てください！ #KINNIKUTOKENCHALLENGE',
+                    };
+                    if (navigator.canShare && navigator.canShare(shareData)) {
+                        try {
+                            await navigator.share(shareData);
+                        } catch (err) {
+                            console.error('Share failed:', err.message);
+                            alert('共有に失敗しました。画像をダウンロードします。');
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'workout-result.png';
+                            link.click();
+                        }
+                    } else {
+                        alert('お使いのブラウザは共有機能をサポートしていません。画像をダウンロードします。');
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'workout-result.png';
+                        link.click();
+                    }
+                }, 'image/png');
+
+            } catch (error) {
+                console.error('Error creating share image:', error);
+                alert('共有画像の生成に失敗しました。');
+            }
+        }
+
         // --- Event Listeners ---
         window.addEventListener('load', function () {
             // Load saved address from localStorage
@@ -351,6 +456,11 @@
                     const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
                     infoModal.show();
                 });
+            }
+
+            const shareButton = document.getElementById('shareButton');
+            if (shareButton) {
+                shareButton.addEventListener('click', shareOnSns);
             }
         });
     </script>
