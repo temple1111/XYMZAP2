@@ -282,24 +282,22 @@
                         }
                     }
 
-                    let progressPercentage = 0;
                     let levelName = LEVEL_NAMES[currentLevelIndex];
                     const maxLevelIndex = LEVEL_THRESHOLDS.length - 1;
+                    const muscleMasterThreshold = LEVEL_THRESHOLDS[maxLevelIndex];
 
-                    if (currentLevelIndex < maxLevelIndex) {
-                        const lowerBound = LEVEL_THRESHOLDS[currentLevelIndex];
-                        const upperBound = LEVEL_THRESHOLDS[currentLevelIndex + 1];
-                        if (upperBound > lowerBound) {
-                            progressPercentage = ((currentTokenCount - lowerBound) / (upperBound - lowerBound)) * 100;
-                        }
-                    } else { // User is at or above the highest named level
-                        progressPercentage = 100;
-                        const muscleMasterThreshold = LEVEL_THRESHOLDS[maxLevelIndex];
+                    // Handle plus levels
+                    if (currentLevelIndex === maxLevelIndex) {
                         const plusLevel = Math.floor((currentTokenCount - muscleMasterThreshold) / 25000);
                         if (plusLevel > 0) {
                             levelName = `${LEVEL_NAMES[maxLevelIndex]} +${plusLevel}`;
                         }
                     }
+
+                    // --- NEW PERCENTAGE LOGIC ---
+                    const totalGoal = muscleMasterThreshold; // 100,000
+                    // Cap the percentage at 100 for the progress bar display
+                    let progressPercentage = Math.min((currentTokenCount / totalGoal) * 100, 100);
 
                     document.getElementById('levelDisplay').textContent = `レベル: ${levelName} (${Math.floor(progressPercentage)}%)`;
                     document.querySelector('.progress-bar').style.width = `${progressPercentage}%`;
