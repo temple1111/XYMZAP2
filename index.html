@@ -151,6 +151,8 @@
                             <small>100,000 KINNIKU-TOKEN 以上</small>
                         </div>
                     </div>
+                    <h6 class="mt-4 fw-bold">無限の頂へ：「プラスレベル」</h6>
+                    <p>「マッスルマスター」は終点ではありません。それは新たな始まりです。マッスルマスターに到達後、さらに25,000トークンを獲得するごとに「+1」「+2」とレベルが上がり続けます。あなたの筋肉の限界に、終わりはありません！</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
@@ -273,26 +275,24 @@
 
                     let currentLevelIndex = 0;
                     let progressPercentage = 0;
+                    let levelName = LEVEL_NAMES[currentLevelIndex];
+                    const maxLevelIndex = LEVEL_THRESHOLDS.length - 1;
 
-                    for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
-                        if (currentTokenCount >= LEVEL_THRESHOLDS[i]) {
-                            currentLevelIndex = i;
-                        } else {
-                            break;
-                        }
-                    }
-
-                    if (currentLevelIndex < LEVEL_THRESHOLDS.length - 1) {
+                    if (currentLevelIndex < maxLevelIndex) {
                         const lowerBound = LEVEL_THRESHOLDS[currentLevelIndex];
                         const upperBound = LEVEL_THRESHOLDS[currentLevelIndex + 1];
                         if (upperBound > lowerBound) {
                             progressPercentage = ((currentTokenCount - lowerBound) / (upperBound - lowerBound)) * 100;
                         }
-                    } else {
+                    } else { // User is at the highest named level
                         progressPercentage = 100;
+                        const muscleMasterThreshold = LEVEL_THRESHOLDS[maxLevelIndex];
+                        const plusLevel = Math.floor((currentTokenCount - muscleMasterThreshold) / 25000);
+                        if (plusLevel > 0) {
+                            levelName = `${LEVEL_NAMES[maxLevelIndex]} +${plusLevel}`;
+                        }
                     }
 
-                    const levelName = LEVEL_NAMES[currentLevelIndex];
                     document.getElementById('levelDisplay').textContent = `レベル: ${levelName} (${Math.floor(progressPercentage)}%)`;
                     document.querySelector('.progress-bar').style.width = `${progressPercentage}%`;
 
