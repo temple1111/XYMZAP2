@@ -417,8 +417,9 @@
                     const file = new File([blob], 'workout-result.png', { type: 'image/png' });
                     const shareData = {
                         files: [file],
-                        title: '筋トレチャレンジ結果！',
-                        text: '今日の筋トレの成果を見てください！ #KINNIKUTOKENCHALLENGE',
+                        title: '筋トレ報告',
+                        text: `私は現在${levelText}です！あなたも筋トレを始めて、KINNIKU-TOKENを手に入れましょう！`,
+                        url: 'https://xymzap-2.vercel.app/'
                     };
                     if (navigator.canShare && navigator.canShare(shareData)) {
                         try {
