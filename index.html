@@ -412,29 +412,24 @@
 
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], 'workout-result.png', { type: 'image/png' });
+                    
+                    const shareText = `私は現在${levelText}です！あなたも筋トレを始めて、KINNIKU-TOKENを手に入れましょう！ https://xymzap-2.vercel.app/`;
+                    
                     const shareData = {
                         files: [file],
-                        title: '筋トレ報告',
-                        text: `私は現在${levelText}です！あなたも筋トレを始めて、KINNIKU-TOKENを手に入れましょう！`,
-                        url: 'https://xymzap-2.vercel.app/'
+                        text: shareText
                     };
+
                     if (navigator.canShare && navigator.canShare(shareData)) {
                         try {
                             await navigator.share(shareData);
-                        } catch (err) {
-                            console.error('Share failed:', err.message);
-                            alert('共有に失敗しました。画像をダウンロードします。');
-                            const link = document.createElement('a');
-                            link.href = URL.createObjectURL(blob);
-                            link.download = 'workout-result.png';
-                            link.click();
+                        } catch (error) {
+                            console.error('共有エラー:', error);
                         }
                     } else {
-                        alert('お使いのブラウザは共有機能をサポートしていません。画像をダウンロードします。');
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(blob);
-                        link.download = 'workout-result.png';
-                        link.click();
+                        navigator.clipboard.writeText(shareText)
+                            .then(() => alert('テキストがクリップボードにコピーされました！'))
+                            .catch(err => console.error('Failed to copy text: ', err));
                     }
                 }, 'image/png');
 
