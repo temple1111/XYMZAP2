@@ -274,6 +274,14 @@
                     else bodyElement.classList.add('background-9');
 
                     let currentLevelIndex = 0;
+                    for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+                        if (currentTokenCount >= LEVEL_THRESHOLDS[i]) {
+                            currentLevelIndex = i;
+                        } else {
+                            break;
+                        }
+                    }
+
                     let progressPercentage = 0;
                     let levelName = LEVEL_NAMES[currentLevelIndex];
                     const maxLevelIndex = LEVEL_THRESHOLDS.length - 1;
@@ -284,7 +292,7 @@
                         if (upperBound > lowerBound) {
                             progressPercentage = ((currentTokenCount - lowerBound) / (upperBound - lowerBound)) * 100;
                         }
-                    } else { // User is at the highest named level
+                    } else { // User is at or above the highest named level
                         progressPercentage = 100;
                         const muscleMasterThreshold = LEVEL_THRESHOLDS[maxLevelIndex];
                         const plusLevel = Math.floor((currentTokenCount - muscleMasterThreshold) / 25000);
