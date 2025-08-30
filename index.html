@@ -64,6 +64,7 @@
 
                 <div class="d-grid mt-3">
                     <button id="shareButton" class="btn btn-success btn-lg" style="display: none;">結果をSNSで共有</button>
+                    <button id="copyTextButton" class="btn btn-secondary btn-lg mt-2" style="display: none;">投稿文をコピー</button>
                 </div>
             </div>
         </div>
@@ -229,6 +230,7 @@
                     transactionDetails.classList.remove('d-none');
                     getAndDisplayTokenBalance(recipientAddressValue);
                     document.getElementById('shareButton').style.display = 'block';
+                    document.getElementById('copyTextButton').style.display = 'block';
                 } else {
                     throw new Error(data.message || '不明なエラーが発生しました。');
                 }
@@ -412,24 +414,29 @@
 
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], 'workout-result.png', { type: 'image/png' });
-                    
-                    const shareText = `私は現在${levelText}です！あなたも筋トレを始めて、KINNIKU-TOKENを手に入れましょう！ https://xymzap-2.vercel.app/`;
-                    
                     const shareData = {
                         files: [file],
-                        text: shareText
+                        title: '筋トレチャレンジ結果！',
+                        text: '今日の筋トレの成果を見てください！ #KINNIKUTOKENCHALLENGE',
+                        url: 'https://xymzap-2.vercel.app/'
                     };
-
                     if (navigator.canShare && navigator.canShare(shareData)) {
                         try {
                             await navigator.share(shareData);
-                        } catch (error) {
-                            console.error('共有エラー:', error);
+                        } catch (err) {
+                            console.error('Share failed:', err.message);
+                            alert('共有に失敗しました。画像をダウンロードします。');
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'workout-result.png';
+                            link.click();
                         }
                     } else {
-                        navigator.clipboard.writeText(shareText)
-                            .then(() => alert('テキストがクリップボードにコピーされました！'))
-                            .catch(err => console.error('Failed to copy text: ', err));
+                        alert('お使いのブラウザは共有機能をサポートしていません。画像をダウンロードします。');
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'workout-result.png';
+                        link.click();
                     }
                 }, 'image/png');
 
@@ -437,6 +444,22 @@
                 console.error('Error creating share image:', error);
                 alert('共有画像の生成に失敗しました。');
             }
+        }
+
+        function copyShareText() {
+            const levelText = document.getElementById('levelDisplay').textContent;
+            const shareText = `私は現在${levelText}です！あなたも筋トレを始めて、KINNIKU-TOKENを手に入れましょう！ https://xymzap-2.vercel.app/`;
+            
+            navigator.clipboard.writeText(shareText).then(() => {
+                const copyButton = document.getElementById('copyTextButton');
+                copyButton.textContent = 'コピーしました！';
+                setTimeout(() => {
+                    copyButton.textContent = '投稿文をコピー';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert('コピーに失敗しました。');
+            });
         }
 
         // --- Event Listeners ---
@@ -485,6 +508,11 @@
             const shareButton = document.getElementById('shareButton');
             if (shareButton) {
                 shareButton.addEventListener('click', shareOnSns);
+            }
+
+            const copyTextButton = document.getElementById('copyTextButton');
+            if (copyTextButton) {
+                copyTextButton.addEventListener('click', copyShareText);
             }
         });
     </script>
