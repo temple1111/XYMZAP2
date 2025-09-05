@@ -29,7 +29,8 @@ const recipientAddressInput = document.getElementById('recipientAddress');
 const workoutEntriesContainer = document.getElementById('workout-entries-container');
 const addWorkoutBtn = document.getElementById('add-workout-btn');
 const showHistoryBtn = document.getElementById('show-history-btn');
-const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+const historyModalEl = document.getElementById('historyModal');
+const historyModal = new bootstrap.Modal(historyModalEl);
 const historyModalBody = document.getElementById('history-modal-body');
 const clearHistoryBtn = document.getElementById('clear-history-btn');
 
@@ -81,28 +82,25 @@ function showWorkoutHistory() {
     const history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
     if (history.length === 0) {
         historyModalBody.innerHTML = '<p>まだ履歴はありません。</p>';
-        historyModal.show();
-        return;
-    }
-
-    const stats = {};
-    history.forEach(entry => {
-        entry.workouts.forEach(workout => {
-            if (!stats[workout.type]) {
-                stats[workout.type] = 0;
-            }
-            stats[workout.type] += workout.reps;
+    } else {
+        const stats = {};
+        history.forEach(entry => {
+            entry.workouts.forEach(workout => {
+                if (!stats[workout.type]) {
+                    stats[workout.type] = 0;
+                }
+                stats[workout.type] += workout.reps;
+            });
         });
-    });
 
-    let statsHtml = '<ul class="list-group">';
-    for (const type in stats) {
-        const workoutName = WORKOUT_JAPANESE_NAMES[type] || type;
-        statsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white">${workoutName}<span class="badge bg-primary rounded-pill">${stats[type]}回</span></li>`;
+        let statsHtml = '<ul class="list-group list-group-flush">';
+        for (const type in stats) {
+            const workoutName = WORKOUT_JAPANESE_NAMES[type] || type;
+            statsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white border-secondary">${workoutName}<span class="badge bg-primary rounded-pill">${stats[type]}回</span></li>`;
+        }
+        statsHtml += '</ul>';
+        historyModalBody.innerHTML = statsHtml;
     }
-    statsHtml += '</ul>';
-
-    historyModalBody.innerHTML = statsHtml;
     historyModal.show();
 }
 
@@ -113,6 +111,8 @@ function clearWorkoutHistory() {
     if (confirm('本当にすべての履歴を削除しますか？この操作は元に戻せません。')) {
         localStorage.removeItem('workoutHistory');
         historyModalBody.innerHTML = '<p>履歴が削除されました。</p>';
+        // Keep the modal open to show the message, or close it:
+        // historyModal.hide(); 
     }
 }
 
@@ -172,7 +172,6 @@ async function createAndSendTransaction() {
             throw new Error(data.message || '不明なエラーが発生しました。');
         }
 
-        // --- Save to history on success ---
         saveWorkoutToHistory(workouts);
 
         const transactionDetails = document.getElementById('transactionDetails');
