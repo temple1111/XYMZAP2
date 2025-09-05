@@ -53,20 +53,15 @@
                         <label for="recipientAddress" class="form-label">受信者のSYMBOLアドレス</label>
                         <input type="text" class="form-control" id="recipientAddress" name="recipientAddress" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="workoutType" class="form-label">筋トレ種目</label>
-                        <select class="form-select" id="workoutType" name="workoutType">
-                            <option value="crunches" selected>腹筋</option>
-                            <option value="pushups">腕立て伏せ</option>
-                            <option value="squats">スクワット</option>
-                            <option value="back_extensions">背筋</option>
-                        </select>
+
+                    <hr class="my-4">
+
+                    <div id="workout-entries-container">
+                        <!-- 筋トレ種目の入力欄はここに動的に追加されます -->
                     </div>
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">回数</label>
-                        <input type="number" class="form-control" id="amount" name="amount" required>
-                    </div>
-                    <div class="d-grid">
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-success" id="add-workout-btn">＋ 種目を追加</button>
                         <button type="button" class="btn btn-primary btn-lg" onclick="createAndSendTransaction()">報酬を獲得</button>
                     </div>
                 </form>

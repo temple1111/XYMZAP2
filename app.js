@@ -3,26 +3,78 @@ const NODE = 'https://xym.jp1.node.leywapool.com:3001';
 const sym = require("/node_modules/symbol-sdk");
 const repo = new sym.RepositoryFactoryHttp(NODE);
 
-// Level thresholds and names
+// --- Constants ---
 const LEVEL_THRESHOLDS = [0, 1000, 2500, 5000, 10000, 15000, 25000, 37500, 50000, 75000, 100000];
 const LEVEL_NAMES = [
     "ビギナー", "ルーキー", "マッスル見習い", "中級マッスル", "ベテラントレーニー",
     "プロビルダー", "筋肉の賢者", "鋼の肉体", "神の領域", "レジェンド", "マッスルマスター"
 ];
+const WORKOUT_OPTIONS = `
+    <option value="crunches" selected>腹筋</option>
+    <option value="pushups">腕立て伏せ</option>
+    <option value="squats">スクワット</option>
+    <option value="back_extensions">背筋</option>
+`;
 
+// --- DOM Elements ---
+const recipientAddressInput = document.getElementById('recipientAddress');
+const workoutEntriesContainer = document.getElementById('workout-entries-container');
+const addWorkoutBtn = document.getElementById('add-workout-btn');
+
+// --- Core Functions ---
+
+/**
+ * Adds a new workout entry row to the form.
+ */
+function addWorkoutEntry() {
+    const entryId = `entry-${Date.now()}`;
+    const newEntry = document.createElement('div');
+    newEntry.classList.add('workout-entry', 'mb-3');
+    newEntry.id = entryId;
+    newEntry.innerHTML = `
+        <div class="input-group">
+            <select class="form-select workout-type" style="flex-grow: 2;">${WORKOUT_OPTIONS}</select>
+            <input type="number" class="form-control workout-reps" placeholder="回数">
+            <button type="button" class="btn btn-outline-danger remove-workout-btn">×</button>
+        </div>
+    `;
+
+    workoutEntriesContainer.appendChild(newEntry);
+
+    // Add event listener to the new remove button
+    newEntry.querySelector('.remove-workout-btn').addEventListener('click', () => {
+        // Prevent removing the last entry
+        if (workoutEntriesContainer.children.length > 1) {
+            newEntry.remove();
+        }
+    });
+}
+
+/**
+ * Gathers all workout data and initiates the transaction.
+ */
 async function createAndSendTransaction() {
-    const recipientAddressValue = document.getElementById('recipientAddress').value;
-    const workoutTypeValue = document.getElementById('workoutType').value;
-    const amountValue = parseInt(document.getElementById('amount').value);
-
-    if (!recipientAddressValue || isNaN(amountValue) || amountValue <= 0) {
-        alert("受信者のSYMBOLアドレスと筋トレの回数を正しく入力してください。");
+    const recipientAddressValue = recipientAddressInput.value;
+    if (!recipientAddressValue) {
+        alert("受信者のSYMBOLアドレスを入力してください。");
         return;
     }
 
-    const MAX_REPS_PER_TRANSACTION = 2000;
-    if (amountValue > MAX_REPS_PER_TRANSACTION) {
-        alert(`筋トレ回数の上限は${MAX_REPS_PER_TRANSACTION}回までです！筋肉を休ませることも大切ですよ！`);
+    const workoutEntries = document.querySelectorAll('.workout-entry');
+    const workouts = [];
+    let hasInvalidEntry = false;
+
+    workoutEntries.forEach(entry => {
+        const type = entry.querySelector('.workout-type').value;
+        const reps = parseInt(entry.querySelector('.workout-reps').value);
+        if (isNaN(reps) || reps <= 0) {
+            hasInvalidEntry = true;
+        }
+        workouts.push({ type, reps });
+    });
+
+    if (workouts.length === 0 || hasInvalidEntry) {
+        alert("少なくとも1つ以上の有効なトレーニング（種目と回数）を入力してください。");
         return;
     }
 
@@ -35,39 +87,35 @@ async function createAndSendTransaction() {
 
     localStorage.setItem('lastUsedAddress', recipientAddressValue);
 
-    const button = document.querySelector('#transferForm button');
+    const button = document.querySelector('#transferForm button[onclick="createAndSendTransaction()"]');
     button.disabled = true;
     button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 処理中...';
 
     try {
         const response = await fetch('/api/send-transaction', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 recipientAddress: recipientAddressValue, 
-                workoutType: workoutTypeValue,
-                amount: parseInt(amountValue) 
+                workouts: workouts
             }),
         });
 
         const data = await response.json();
-        const transactionDetails = document.getElementById('transactionDetails');
-        const estimatedCaloriesDisplay = document.getElementById('estimatedCaloriesDisplay');
-
-        if (response.ok) {
-            document.getElementById('message').textContent = `message: ${data.transactionMessage}`;
-            if (data.estimatedCalories !== undefined) {
-                estimatedCaloriesDisplay.textContent = `消費カロリー: ${data.estimatedCalories.toFixed(1)} kcal`;
-            }
-            transactionDetails.classList.remove('d-none');
-            getAndDisplayTokenBalance(recipientAddressValue);
-            document.getElementById('shareButton').style.display = 'block';
-            document.getElementById('copyTextButton').style.display = 'block';
-        } else {
+        if (!response.ok) {
             throw new Error(data.message || '不明なエラーが発生しました。');
         }
+
+        const transactionDetails = document.getElementById('transactionDetails');
+        const estimatedCaloriesDisplay = document.getElementById('estimatedCaloriesDisplay');
+        document.getElementById('message').textContent = `message: ${data.transactionMessage}`;
+        if (data.estimatedCalories !== undefined) {
+            estimatedCaloriesDisplay.textContent = `総消費カロリー: ${data.estimatedCalories.toFixed(1)} kcal`;
+        }
+        transactionDetails.classList.remove('d-none');
+        getAndDisplayTokenBalance(recipientAddressValue);
+        document.getElementById('shareButton').style.display = 'block';
+        document.getElementById('copyTextButton').style.display = 'block';
 
     } catch (error) {
         console.error("API呼び出し中にエラーが発生しました:", error);
@@ -77,6 +125,8 @@ async function createAndSendTransaction() {
         button.textContent = '報酬を獲得';
     }
 }
+
+// (The rest of the functions like getAndDisplayTokenBalance, shareOnSns, etc. remain largely the same)
 
 async function getAndDisplayTokenBalance(address) {
     const tokenId = '44FD959F9F2ECF4D';
@@ -283,7 +333,6 @@ function copyShareText() {
 // --- Event Listeners ---
 window.addEventListener('load', function () {
     const savedAddress = localStorage.getItem('lastUsedAddress');
-    const recipientAddressInput = document.getElementById('recipientAddress');
     if (savedAddress && recipientAddressInput) {
         recipientAddressInput.value = savedAddress;
         getAndDisplayTokenBalance(savedAddress);
@@ -292,6 +341,9 @@ window.addEventListener('load', function () {
     if(recipientAddressInput) {
         recipientAddressInput.addEventListener('input', () => getAndDisplayTokenBalance(recipientAddressInput.value));
     }
+
+    addWorkoutBtn.addEventListener('click', addWorkoutEntry); 
+    addWorkoutEntry(); // Add the first entry on page load
 
     const openDrawerButton = document.getElementById('open-drawer-button');
     const closeDrawerButton = document.getElementById('close-drawer-button');

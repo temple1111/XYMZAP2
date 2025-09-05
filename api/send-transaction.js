@@ -23,13 +23,13 @@ const WORKOUT_SETTINGS = {
 };
 
 /**
- * Generates a motivational message using the Gemini API.
- * @param {string} workoutName The name of the workout.
- * @param {number} reps The number of workout repetitions.
+ * Generates a motivational message for multiple workouts.
+ * @param {Array<object>} workouts - Array of workout objects, e.g., [{name: 'スクワット', reps: 50}]
  * @returns {Promise<string>} A motivational message.
  */
-async function generateTransactionMessage(workoutName, reps) {
-    const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、「${workoutName}」を${reps}回やり遂げました。この素晴らしい成果を称え、必ず「${workoutName}」という単語を使って、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。例：「その1回の${workoutName}が筋肉をデカくする！」`;
+async function generateTransactionMessage(workouts) {
+    const workoutSummary = workouts.map(w => `${w.name}を${w.reps}回`).join('、');
+    const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、素晴らしいトレーニングセッションを終えました。内容は「${workoutSummary}」です。この総合的な努力を称え、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。`;
 
     try {
         const result = await geminiModel.generateContent(prompt);
@@ -37,7 +37,7 @@ async function generateTransactionMessage(workoutName, reps) {
         return response.text();
     } catch (error) {
         console.error("Error generating message with Gemini:", error);
-        return "ナイスファイト！その調子で頑張ろう！"; // Fallback message
+        return "素晴らしいトレーニングでした！ナイスファイト！"; // Fallback message
     }
 }
 
@@ -50,23 +50,35 @@ module.exports = async (req, res) => {
         return res.status(500).json({ message: 'Server configuration error: Private key not set.' });
     }
 
-    const { recipientAddress, workoutType, amount: reps } = req.body;
-    const settings = WORKOUT_SETTINGS[workoutType];
+    const { recipientAddress, workouts } = req.body;
 
-    if (!recipientAddress || !reps || reps <= 0 || !settings) {
-        return res.status(400).json({ message: 'Invalid input. Please provide a valid address, workout type, and number of reps.' });
+    if (!recipientAddress || !Array.isArray(workouts) || workouts.length === 0) {
+        return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
     }
 
     try {
-        // Calculate final token amount and calories based on workout type
-        const finalTokenAmount = Math.floor(reps * settings.tokenMultiplier);
-        const estimatedCalories = reps * settings.caloriesPerRep;
+        let totalTokenAmount = 0;
+        let totalCalories = 0;
+        const workoutDetailsForPrompt = [];
 
-        // Generate the message first
-        const generatedMessage = await generateTransactionMessage(settings.name, reps);
+        for (const workout of workouts) {
+            const settings = WORKOUT_SETTINGS[workout.type];
+            if (!settings || !workout.reps || workout.reps <= 0) {
+                // Skip invalid entries silently or return an error
+                continue;
+            }
+            totalTokenAmount += Math.floor(workout.reps * settings.tokenMultiplier);
+            totalCalories += workout.reps * settings.caloriesPerRep;
+            workoutDetailsForPrompt.push({ name: settings.name, reps: workout.reps });
+        }
+
+        if (totalTokenAmount <= 0) {
+            return res.status(400).json({ message: 'No valid workouts provided to calculate a reward.' });
+        }
+
+        const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt);
         const txMessage = PlainMessage.create(generatedMessage);
 
-        // Setup Symbol transaction
         const repoFactory = new RepositoryFactoryHttp(NODE);
         const networkType = await repoFactory.getNetworkType().toPromise();
         const generationHash = await repoFactory.getGenerationHash().toPromise();
@@ -76,7 +88,7 @@ module.exports = async (req, res) => {
         const transferTransaction = TransferTransaction.create(
             Deadline.create(SYMBOL_EPOCH_ADJUSTMENT), 
             recipient,
-            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(finalTokenAmount))],
+            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(totalTokenAmount))],
             txMessage,
             networkType
         ).setMaxFee(100);
@@ -89,7 +101,7 @@ module.exports = async (req, res) => {
         res.status(200).json({ 
             message: 'Transaction announced successfully!', 
             transactionMessage: txMessage.payload, 
-            estimatedCalories: estimatedCalories 
+            estimatedCalories: totalCalories 
         });
 
     } catch (error) {
