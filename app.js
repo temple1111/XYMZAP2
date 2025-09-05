@@ -3,6 +3,21 @@ const NODE = 'https://xym.jp1.node.leywapool.com:3001';
 const sym = require("/node_modules/symbol-sdk");
 const repo = new sym.RepositoryFactoryHttp(NODE);
 
+let workoutHistory = {}; // 筋トレ履歴を保持するオブジェクト
+
+// LocalStorageから履歴を読み込む
+function loadWorkoutHistory() {
+    const historyJson = localStorage.getItem('workoutHistory');
+    if (historyJson) {
+        workoutHistory = JSON.parse(historyJson);
+    }
+}
+
+// LocalStorageに履歴を保存する
+function saveWorkoutHistory() {
+    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+}
+
 // --- Constants ---
 const LEVEL_THRESHOLDS = [0, 1000, 2500, 5000, 10000, 15000, 25000, 37500, 50000, 75000, 100000];
 const LEVEL_NAMES = [
@@ -16,6 +31,42 @@ const WORKOUT_OPTIONS = `
     <option value="back_extensions">背筋</option>
     <option value="general_workout">筋トレ全般</option>
 `;
+
+function renderWorkoutHistory() {
+    const historyContainer = document.getElementById('workout-history');
+    historyContainer.innerHTML = ''; // 既存の表示をクリア
+
+    const noHistoryMessage = document.getElementById('no-history-message');
+    if (Object.keys(workoutHistory).length === 0) {
+        if (noHistoryMessage) noHistoryMessage.style.display = 'block';
+        return;
+    } else {
+        if (noHistoryMessage) noHistoryMessage.style.display = 'none';
+    }
+
+    for (const type in workoutHistory) {
+        if (workoutHistory.hasOwnProperty(type)) {
+            const reps = workoutHistory[type];
+            const historyItem = document.createElement('div');
+            historyItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'bg-dark-subtle', 'text-white');
+            historyItem.innerHTML = `
+                ${type}: ${reps} 回
+                <button type="button" class="btn btn-sm btn-outline-danger delete-history-btn" data-workout-type="${type}">削除</button>
+            `;
+            historyContainer.appendChild(historyItem);
+        }
+    }
+
+    // 削除ボタンにイベントリスナーを設定
+    historyContainer.querySelectorAll('.delete-history-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const workoutTypeToDelete = event.target.dataset.workoutType;
+            delete workoutHistory[workoutTypeToDelete];
+            saveWorkoutHistory();
+            renderWorkoutHistory(); // 表示を更新
+        });
+    });
+}
 
 // --- DOM Elements ---
 const recipientAddressInput = document.getElementById('recipientAddress');
@@ -116,7 +167,25 @@ async function createAndSendTransaction() {
         transactionDetails.classList.remove('d-none');
         getAndDisplayTokenBalance(recipientAddressValue);
         document.getElementById('shareButton').style.display = 'block';
-        document.getElementById('copyTextButton').style.display = 'block';
+                document.getElementById('copyTextButton').style.display = 'block';
+
+        // 筋トレ履歴を更新
+        workouts.forEach(workout => {
+            const workoutType = workout.type; // 例: "crunches", "pushups"
+            const workoutReps = workout.reps;
+
+            // WORKOUT_OPTIONSから表示名を取得
+            const workoutOptionElement = document.querySelector(`.workout-type option[value="${workoutType}"]`);
+            const displayType = workoutOptionElement ? workoutOptionElement.textContent : workoutType;
+
+            if (workoutHistory[displayType]) {
+                workoutHistory[displayType] += workoutReps;
+            } else {
+                workoutHistory[displayType] = workoutReps;
+            }
+        });
+        saveWorkoutHistory();
+        renderWorkoutHistory(); // 履歴表示を更新
 
     } catch (error) {
         console.error("API呼び出し中にエラーが発生しました:", error);
@@ -338,6 +407,9 @@ window.addEventListener('load', function () {
         recipientAddressInput.value = savedAddress;
         getAndDisplayTokenBalance(savedAddress);
     }
+
+    loadWorkoutHistory(); // 履歴を読み込む
+    renderWorkoutHistory(); // 履歴を表示する
 
     if(recipientAddressInput) {
         recipientAddressInput.addEventListener('input', () => getAndDisplayTokenBalance(recipientAddressInput.value));
