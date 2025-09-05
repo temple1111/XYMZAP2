@@ -16,6 +16,7 @@ const geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 // --- Workout-related constants ---
 const WORKOUT_SETTINGS = {
+    general:        { name: '筋トレ', tokenMultiplier: 1.0, caloriesPerRep: 0.5 },
     crunches:       { name: '腹筋', tokenMultiplier: 1.0, caloriesPerRep: 0.4 },
     pushups:        { name: '腕立て伏せ', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
     squats:         { name: 'スクワット', tokenMultiplier: 1.5, caloriesPerRep: 0.8 },

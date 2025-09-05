@@ -10,7 +10,8 @@ const LEVEL_NAMES = [
     "プロビルダー", "筋肉の賢者", "鋼の肉体", "神の領域", "レジェンド", "マッスルマスター"
 ];
 const WORKOUT_OPTIONS = `
-    <option value="crunches" selected>腹筋</option>
+    <option value="general" selected>筋トレ全般</option>
+    <option value="crunches">腹筋</option>
     <option value="pushups">腕立て伏せ</option>
     <option value="squats">スクワット</option>
     <option value="back_extensions">背筋</option>
