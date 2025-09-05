@@ -23,13 +23,6 @@ const WORKOUT_JAPANESE_NAMES = {
     squats: 'スクワット',
     back_extensions: '背筋'
 };
-const WORKOUT_JAPANESE_NAMES = {
-    general: '筋トレ全般',
-    crunches: '腹筋',
-    pushups: '腕立て伏せ',
-    squats: 'スクワット',
-    back_extensions: '背筋'
-};
 
 // --- DOM Elements ---
 const recipientAddressInput = document.getElementById('recipientAddress');
@@ -51,13 +44,13 @@ function addWorkoutEntry() {
     const newEntry = document.createElement('div');
     newEntry.classList.add('workout-entry', 'mb-3');
     newEntry.id = entryId;
-    newEntry.innerHTML = `
-        <div class="input-group">
-            <select class="form-select workout-type" style="flex-grow: 2;">${WORKOUT_OPTIONS}</select>
-            <input type="number" class="form-control workout-reps" placeholder="回数">
-            <button type="button" class="btn btn-outline-danger remove-workout-btn">×</button>
+    newEntry.innerHTML = "`
+        <div class=\"input-group\">
+            <select class=\"form-select workout-type\" style=\"flex-grow: 2;\">${WORKOUT_OPTIONS}</select>
+            <input type=\"number\" class=\"form-control workout-reps\" placeholder=\"回数\">
+            <button type=\"button\" class=\"btn btn-outline-danger remove-workout-btn\">×</button>
         </div>
-    `;
+    ";
 
     workoutEntriesContainer.appendChild(newEntry);
 
@@ -375,7 +368,7 @@ async function shareOnSns() {
             } else {
                 alert('お使いのブラウザは共有機能をサポートしていません。画像をダウンロードします。');
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
+                    link.href = URL.createObjectURL(blob);
                 link.download = 'workout-result.png';
                 link.click();
             }
