@@ -14,6 +14,7 @@ const WORKOUT_OPTIONS = `
     <option value="pushups">腕立て伏せ</option>
     <option value="squats">スクワット</option>
     <option value="back_extensions">背筋</option>
+    <option value="general_workout">筋トレ全般</option>
 `;
 
 // --- DOM Elements ---
