@@ -29,7 +29,7 @@ const WORKOUT_SETTINGS = {
  * @returns {Promise<string>} A motivational message.
  */
 async function generateTransactionMessage(workoutName, reps) {
-    const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、「${workoutName}」を${reps}回やり遂げました。この素晴らしい成果を見て、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。例：「その1回が${workoutName}の質を高める！」「昨日の自分を超えたな！」`;
+    const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、「${workoutName}」を${reps}回やり遂げました。この素晴らしい成果を称え、必ず「${workoutName}」という単語を使って、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。例：「その1回の${workoutName}が筋肉をデカくする！」`;
 
     try {
         const result = await geminiModel.generateContent(prompt);
