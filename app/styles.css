@@ -29,16 +29,16 @@ body {
 }
 
 /* --- Background Image Classes --- */
-.background-0 { background-image: url('0.png'); }
-.background-1 { background-image: url('1.png'); }
-.background-2 { background-image: url('2.png'); }
-.background-3 { background-image: url('3.png'); }
-.background-4 { background-image: url('4.png'); }
-.background-5 { background-image: url('5.png'); }
-.background-6 { background-image: url('6.png'); }
-.background-7 { background-image: url('7.png'); }
-.background-8 { background-image: url('8.png'); }
-.background-9 { background-image: url('9.png'); }
+.background-0 { background-image: url('../0.png'); }
+.background-1 { background-image: url('../1.png'); }
+.background-2 { background-image: url('../2.png'); }
+.background-3 { background-image: url('../3.png'); }
+.background-4 { background-image: url('../4.png'); }
+.background-5 { background-image: url('../5.png'); }
+.background-6 { background-image: url('../6.png'); }
+.background-7 { background-image: url('../7.png'); }
+.background-8 { background-image: url('../8.png'); }
+.background-9 { background-image: url('../9.png'); }
 
 /* --- Main Action Button --- */
 .main-action-container {

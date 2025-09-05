@@ -48,6 +48,7 @@ async function createAndSendTransaction() {
             },
             body: JSON.stringify({ 
                 recipientAddress: recipientAddressValue, 
+                workoutType: workoutTypeValue,
                 amount: parseInt(amountValue) 
             }),
         });
@@ -132,7 +133,7 @@ async function getAndDisplayTokenBalance(address) {
             bodyElement.className = `background-${backgroundIndex}`;
 
             // バッジ画像の更新
-            document.getElementById('currentLevelBadge').src = `level${currentLevelIndex}_badge.svg`;
+            document.getElementById('currentLevelBadge').src = `../level${currentLevelIndex}_badge.svg`;
             
         } else {
             tokenBalanceElement.textContent = 'トークンを保有していません';
@@ -347,5 +348,7 @@ window.addEventListener('load', function () {
     const copyTextButton = document.getElementById('copyTextButton');
     if (copyTextButton) {
         copyTextButton.addEventListener('click', copyShareText);
+    }
+});ick', copyShareText);
     }
 });

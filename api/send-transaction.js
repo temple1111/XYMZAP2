@@ -6,9 +6,6 @@ const NODE = 'https://xym.jp1.node.leywapool.com:3001';
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const SYMBOL_EPOCH_ADJUSTMENT = 1615853188;
 
-// --- Calorie Calculation Constant ---
-const CALORIES_PER_REP = 0.5; // Example: 0.5 kcal per rep
-
 // --- Gemini-related setup ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
@@ -17,13 +14,22 @@ if (!GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+// --- Workout-related constants ---
+const WORKOUT_SETTINGS = {
+    crunches:       { name: '腹筋', tokenMultiplier: 1.0, caloriesPerRep: 0.4 },
+    pushups:        { name: '腕立て伏せ', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
+    squats:         { name: 'スクワット', tokenMultiplier: 1.5, caloriesPerRep: 0.8 },
+    back_extensions: { name: '背筋', tokenMultiplier: 1.2, caloriesPerRep: 0.5 },
+};
+
 /**
- * Generates a motivational message using the Gemini API based on the number of reps.
- * @param {number} amount The number of workout repetitions.
+ * Generates a motivational message using the Gemini API.
+ * @param {string} workoutName The name of the workout.
+ * @param {number} reps The number of workout repetitions.
  * @returns {Promise<string>} A motivational message.
  */
-async function generateTransactionMessage(amount) {
-        const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、筋力トレーニングを終えました。トレーニング回数は${amount}回です。この回数を見て、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。例：「その1回が筋肉をデカくする！」「昨日の自分を超えたな！」`;
+async function generateTransactionMessage(workoutName, reps) {
+    const prompt = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、「${workoutName}」を${reps}回やり遂げました。この素晴らしい成果を見て、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。例：「その1回が${workoutName}の質を高める！」「昨日の自分を超えたな！」`;
 
     try {
         const result = await geminiModel.generateContent(prompt);
@@ -31,11 +37,9 @@ async function generateTransactionMessage(amount) {
         return response.text();
     } catch (error) {
         console.error("Error generating message with Gemini:", error);
-        // Fallback message in case of Gemini API error
-        return "ナイスファイト！その調子で頑張ろう！";
+        return "ナイスファイト！その調子で頑張ろう！"; // Fallback message
     }
 }
-
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
@@ -46,19 +50,21 @@ module.exports = async (req, res) => {
         return res.status(500).json({ message: 'Server configuration error: Private key not set.' });
     }
 
-    const { recipientAddress, amount } = req.body;
+    const { recipientAddress, workoutType, amount: reps } = req.body;
+    const settings = WORKOUT_SETTINGS[workoutType];
 
-    if (!recipientAddress || !amount || amount <= 0) {
-        return res.status(400).json({ message: 'Invalid input. Please provide a valid address and amount.' });
+    if (!recipientAddress || !reps || reps <= 0 || !settings) {
+        return res.status(400).json({ message: 'Invalid input. Please provide a valid address, workout type, and number of reps.' });
     }
 
     try {
-        // Generate the message first
-        const generatedMessage = await generateTransactionMessage(amount);
-        const txMessage = PlainMessage.create(generatedMessage);
+        // Calculate final token amount and calories based on workout type
+        const finalTokenAmount = Math.floor(reps * settings.tokenMultiplier);
+        const estimatedCalories = reps * settings.caloriesPerRep;
 
-        // Calculate estimated calories
-        const estimatedCalories = amount * CALORIES_PER_REP;
+        // Generate the message first
+        const generatedMessage = await generateTransactionMessage(settings.name, reps);
+        const txMessage = PlainMessage.create(generatedMessage);
 
         // Setup Symbol transaction
         const repoFactory = new RepositoryFactoryHttp(NODE);
@@ -70,7 +76,7 @@ module.exports = async (req, res) => {
         const transferTransaction = TransferTransaction.create(
             Deadline.create(SYMBOL_EPOCH_ADJUSTMENT), 
             recipient,
-            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(amount))],
+            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(finalTokenAmount))],
             txMessage,
             networkType
         ).setMaxFee(100);
@@ -80,7 +86,11 @@ module.exports = async (req, res) => {
         const transactionHttp = repoFactory.createTransactionRepository();
         await transactionHttp.announce(signedTx).toPromise();
 
-        res.status(200).json({ message: 'Transaction announced successfully!', transactionMessage: txMessage.payload, estimatedCalories: estimatedCalories });
+        res.status(200).json({ 
+            message: 'Transaction announced successfully!', 
+            transactionMessage: txMessage.payload, 
+            estimatedCalories: estimatedCalories 
+        });
 
     } catch (error) {
         console.error(error);
