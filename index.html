@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Symbol Transfer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
     <script src="https://xembook.github.io/nem2-browserify/symbol-sdk-2.0.4.js"></script>
 </head>
 <body class="background-0">
@@ -34,10 +34,13 @@
                 <div class="mb-3">
                     <p class="text-center mb-1 fw-bold" id="levelDisplay">レベル: ビギナー (0%)</p>
                     <div class="text-center mb-2">
-                        <img id="currentLevelBadge" src="level0_badge.svg" alt="現在のレベルバッジ" class="img-fluid" style="max-width: 80px;">
+                        <img id="currentLevelBadge" src="/level0_badge.svg" alt="現在のレベルバッジ" class="img-fluid" style="max-width: 80px;">
                     </div>
                     <div class="progress" role="progressbar" aria-label="Level Progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-bar bg-success" style="width: 0%"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-light" id="show-history-btn">トレーニング履歴</button>
                     </div>
                 </div>
             
@@ -46,7 +49,7 @@
                     <p id="estimatedCaloriesDisplay" class="mb-0 mt-2"></p>
                 </div>
 
-                <p id="siteDescription" class="text-center text-muted mb-4">あなたのSYMBOLアドレスと筋トレ回数を入力し、報酬獲得ボタンを押してください。</p>
+                <p id="siteDescription" class="text-center text-muted mb-4">あなたのSYMBOLアドレスと筋トレ内容を入力し、報酬獲得ボタンを押してください。</p>
                 
                 <form id="transferForm">
                     <div class="mb-3">
@@ -76,6 +79,26 @@
 
     <canvas id="shareCanvas" width="1080" height="1080" style="display: none;"></canvas>
 
+    <!-- History Modal -->
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historyModalLabel">トレーニング履歴</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="history-modal-body">
+                    <!-- 履歴はここに動的に生成されます -->
+                    <p>まだ履歴はありません。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger btn-sm" id="clear-history-btn">全履歴を削除</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content glass-card">
@@ -101,57 +124,57 @@
                     <p>あなたの筋トレの成果は、特別なバッジとして称えられます。保有トークン数に応じて、以下のバッジを獲得できます。</p>
                     <div class="badge-list row">
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level0_badge.svg" alt="ビギナーバッジ" class="level-badge img-fluid">
+                            <img src="/level0_badge.svg" alt="ビギナーバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>ビギナー</strong></p>
                             <small>0 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level1_badge.svg" alt="ルーキーバッジ" class="level-badge img-fluid">
+                            <img src="/level1_badge.svg" alt="ルーキーバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>ルーキー</strong></p>
                             <small>1,000 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level2_badge.svg" alt="マッスル見習いバッジ" class="level-badge img-fluid">
+                            <img src="/level2_badge.svg" alt="マッスル見習いバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>マッスル見習い</strong></p>
                             <small>2,500 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level3_badge.svg" alt="中級マッスルバッジ" class="level-badge img-fluid">
+                            <img src="/level3_badge.svg" alt="中級マッスルバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>中級マッスル</strong></p>
                             <small>5,000 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level4_badge.svg" alt="ベテラントレーニーバッジ" class="level-badge img-fluid">
+                            <img src="/level4_badge.svg" alt="ベテラントレーニーバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>ベテラントレーニー</strong></p>
                             <small>10,000 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level5_badge.svg" alt="プロビルダーバッジ" class="level-badge img-fluid">
+                            <img src="/level5_badge.svg" alt="プロビルダーバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>プロビルダー</strong></p>
                             <small>15,000 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level6_badge.svg" alt="筋肉の賢者バッジ" class="level-badge img-fluid">
+                            <img src="/level6_badge.svg" alt="筋肉の賢者バッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>筋肉の賢者</strong></p>
                             <small>25,000 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level7_badge.svg" alt="鋼の肉体バッジ" class="level-badge img-fluid">
+                            <img src="/level7_badge.svg" alt="鋼の肉体バッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>鋼の肉体</strong></p>
                             <small>37,500 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level8_badge.svg" alt="神の領域バッジ" class="level-badge img-fluid">
+                            <img src="/level8_badge.svg" alt="神の領域バッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>神の領域</strong></p>
                             <small>50,000 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level9_badge.svg" alt="レジェンドバッジ" class="level-badge img-fluid">
+                            <img src="/level9_badge.svg" alt="レジェンドバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>レジェンド</strong></p>
                             <small>75,000 KINNIKU-TOKEN 以上</small>
                         </div>
                         <div class="badge-item col-6 col-md-4 text-center mb-3">
-                            <img src="level10_badge.svg" alt="マッスルマスターバッジ" class="level-badge img-fluid">
+                            <img src="/level10_badge.svg" alt="マッスルマスターバッジ" class="level-badge img-fluid">
                             <p class="mb-0"><strong>マッスルマスター</strong></p>
                             <small>100,000 KINNIKU-TOKEN 以上</small>
                         </div>
@@ -164,6 +187,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -171,6 +195,6 @@
     <footer class="text-center text-white-50 mt-5 mb-3" style="font-size: 0.8em;">
         <p>&copy; 2025 XYMZAP. All rights reserved.</p>
     </footer>
-    <script src="app.js"></script>
+    <script src="/app.js"></script>
 </body>
 </html>

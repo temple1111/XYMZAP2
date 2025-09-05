@@ -16,11 +16,23 @@ const WORKOUT_OPTIONS = `
     <option value="squats">スクワット</option>
     <option value="back_extensions">背筋</option>
 `;
+const WORKOUT_JAPANESE_NAMES = {
+    general: '筋トレ全般',
+    crunches: '腹筋',
+    pushups: '腕立て伏せ',
+    squats: 'スクワット',
+    back_extensions: '背筋'
+};
 
 // --- DOM Elements ---
 const recipientAddressInput = document.getElementById('recipientAddress');
 const workoutEntriesContainer = document.getElementById('workout-entries-container');
 const addWorkoutBtn = document.getElementById('add-workout-btn');
+const showHistoryBtn = document.getElementById('show-history-btn');
+const historyModalEl = document.getElementById('historyModal');
+const historyModal = new bootstrap.Modal(historyModalEl);
+const historyModalBody = document.getElementById('history-modal-body');
+const clearHistoryBtn = document.getElementById('clear-history-btn');
 
 // --- Core Functions ---
 
@@ -32,19 +44,16 @@ function addWorkoutEntry() {
     const newEntry = document.createElement('div');
     newEntry.classList.add('workout-entry', 'mb-3');
     newEntry.id = entryId;
-    newEntry.innerHTML = `
-        <div class="input-group">
-            <select class="form-select workout-type" style="flex-grow: 2;">${WORKOUT_OPTIONS}</select>
-            <input type="number" class="form-control workout-reps" placeholder="回数">
-            <button type="button" class="btn btn-outline-danger remove-workout-btn">×</button>
-        </div>
-    `;
+    newEntry.innerHTML = 
+        '<div class="input-group">' +
+            '<select class="form-select workout-type" style="flex-grow: 2;">' + WORKOUT_OPTIONS + '</select>' +
+            '<input type="number" class="form-control workout-reps" placeholder="回数">' +
+            '<button type="button" class="btn btn-outline-danger remove-workout-btn">×</button>' +
+        '</div>';
 
     workoutEntriesContainer.appendChild(newEntry);
 
-    // Add event listener to the new remove button
     newEntry.querySelector('.remove-workout-btn').addEventListener('click', () => {
-        // Prevent removing the last entry
         if (workoutEntriesContainer.children.length > 1) {
             newEntry.remove();
         }
@@ -52,11 +61,66 @@ function addWorkoutEntry() {
 }
 
 /**
+ * Saves the successful workout to localStorage.
+ * @param {Array<object>} workouts - Array of workout objects [{type, reps}].
+ */
+function saveWorkoutToHistory(workouts) {
+    const history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
+    const newHistoryEntry = {
+        date: new Date().toISOString(),
+        workouts: workouts
+    };
+    history.push(newHistoryEntry);
+    localStorage.setItem('workoutHistory', JSON.stringify(history));
+}
+
+/**
+ * Displays the aggregated workout history in the modal.
+ */
+function showWorkoutHistory() {
+    const history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
+    if (history.length === 0) {
+        historyModalBody.innerHTML = '<p>まだ履歴はありません。</p>';
+    } else {
+        const stats = {};
+        history.forEach(entry => {
+            entry.workouts.forEach(workout => {
+                if (!stats[workout.type]) {
+                    stats[workout.type] = 0;
+                }
+                stats[workout.type] += workout.reps;
+            });
+        });
+
+        let statsHtml = '<ul class="list-group list-group-flush">';
+        for (const type in stats) {
+            const workoutName = WORKOUT_JAPANESE_NAMES[type] || type;
+            statsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white border-secondary">${workoutName}<span class="badge bg-primary rounded-pill">${stats[type]}回</span></li>`;
+        }
+        statsHtml += '</ul>';
+        historyModalBody.innerHTML = statsHtml;
+    }
+    historyModal.show();
+}
+
+/**
+ * Clears all workout history from localStorage.
+ */
+function clearWorkoutHistory() {
+    if (confirm('本当にすべての履歴を削除しますか？この操作は元に戻せません。')) {
+        localStorage.removeItem('workoutHistory');
+        historyModalBody.innerHTML = '<p>履歴が削除されました。</p>';
+        // Keep the modal open to show the message, or close it:
+        // historyModal.hide(); 
+    }
+}
+
+/**
  * Gathers all workout data and initiates the transaction.
  */
 async function createAndSendTransaction() {
-    const recipientAddressValue = recipientAddressInput.value;
-    if (!recipientAddressValue) {
+    const recipientAddressInput = document.getElementById('recipientAddress');
+    if (!recipientAddressInput) {
         alert("受信者のSYMBOLアドレスを入力してください。");
         return;
     }
@@ -80,13 +144,13 @@ async function createAndSendTransaction() {
     }
 
     try {
-        sym.Address.createFromRawAddress(recipientAddressValue);
+        sym.Address.createFromRawAddress(recipientAddressInput.value);
     } catch (error) {
         alert("アドレスの形式が正しくないようです。");
         return;
     }
 
-    localStorage.setItem('lastUsedAddress', recipientAddressValue);
+    localStorage.setItem('lastUsedAddress', recipientAddressInput.value);
 
     const button = document.querySelector('#transferForm button[onclick="createAndSendTransaction()"]');
     button.disabled = true;
@@ -97,7 +161,7 @@ async function createAndSendTransaction() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                recipientAddress: recipientAddressValue, 
+                recipientAddress: recipientAddressInput.value, 
                 workouts: workouts
             }),
         });
@@ -107,6 +171,8 @@ async function createAndSendTransaction() {
             throw new Error(data.message || '不明なエラーが発生しました。');
         }
 
+        saveWorkoutToHistory(workouts);
+
         const transactionDetails = document.getElementById('transactionDetails');
         const estimatedCaloriesDisplay = document.getElementById('estimatedCaloriesDisplay');
         document.getElementById('message').textContent = `message: ${data.transactionMessage}`;
@@ -114,7 +180,7 @@ async function createAndSendTransaction() {
             estimatedCaloriesDisplay.textContent = `総消費カロリー: ${data.estimatedCalories.toFixed(1)} kcal`;
         }
         transactionDetails.classList.remove('d-none');
-        getAndDisplayTokenBalance(recipientAddressValue);
+        getAndDisplayTokenBalance(recipientAddressInput.value);
         document.getElementById('shareButton').style.display = 'block';
         document.getElementById('copyTextButton').style.display = 'block';
 
@@ -142,7 +208,7 @@ async function getAndDisplayTokenBalance(address) {
         const tokenBalanceElement = document.getElementById('tokenBalance');
         const bodyElement = document.body;
         
-        bodyElement.className = 'background-0'; // Reset class
+        bodyElement.className = `background-${backgroundIndex}`;
 
         let currentTokenCount = 0;
         if (tokenBalance) {
@@ -178,14 +244,14 @@ async function getAndDisplayTokenBalance(address) {
             const backgroundIndex = Math.min(currentLevelIndex, 9);
             bodyElement.className = `background-${backgroundIndex}`;
 
-            document.getElementById('currentLevelBadge').src = `level${currentLevelIndex}_badge.svg`;
+            document.getElementById('currentLevelBadge').src = `/level${currentLevelIndex}_badge.svg`;
             
         } else {
             tokenBalanceElement.textContent = 'トークンを保有していません';
             bodyElement.classList.add('background-0');
             document.getElementById('levelDisplay').textContent = `レベル: ビギナー (0%)`;
             document.querySelector('.progress-bar').style.width = `0%`;
-            document.getElementById('currentLevelBadge').src = `level0_badge.svg`;
+            document.getElementById('currentLevelBadge').src = `/level0_badge.svg`;
         }
     } catch (error) {
         console.error(error);
@@ -217,7 +283,7 @@ async function shareOnSns() {
     }
 
     const backgroundIndex = Math.min(currentLevelIndex, 9);
-    const backgroundImageSrc = `${backgroundIndex}.png`;
+    const backgroundImageSrc = `/${backgroundIndex}.png`;
 
     const loadImage = src => new Promise((resolve, reject) => {
         const img = new Image();
@@ -301,7 +367,7 @@ async function shareOnSns() {
             } else {
                 alert('お使いのブラウザは共有機能をサポートしていません。画像をダウンロードします。');
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
+                    link.href = URL.createObjectURL(blob);
                 link.download = 'workout-result.png';
                 link.click();
             }
@@ -343,8 +409,11 @@ window.addEventListener('load', function () {
         recipientAddressInput.addEventListener('input', () => getAndDisplayTokenBalance(recipientAddressInput.value));
     }
 
-    addWorkoutBtn.addEventListener('click', addWorkoutEntry); 
+    addWorkoutBtn.addEventListener('click', addWorkoutEntry);
     addWorkoutEntry(); // Add the first entry on page load
+
+    showHistoryBtn.addEventListener('click', showWorkoutHistory);
+    clearHistoryBtn.addEventListener('click', clearWorkoutHistory);
 
     const openDrawerButton = document.getElementById('open-drawer-button');
     const closeDrawerButton = document.getElementById('close-drawer-button');
