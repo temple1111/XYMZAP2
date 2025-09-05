@@ -20,6 +20,7 @@ const WORKOUT_SETTINGS = {
     pushups:        { name: '腕立て伏せ', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
     squats:         { name: 'スクワット', tokenMultiplier: 1.5, caloriesPerRep: 0.8 },
     back_extensions: { name: '背筋', tokenMultiplier: 1.2, caloriesPerRep: 0.5 },
+    general_workout: { name: '筋トレ全般', tokenMultiplier: 1.0, caloriesPerRep: 0.5 },
 };
 
 /**
