@@ -44,13 +44,12 @@ function addWorkoutEntry() {
     const newEntry = document.createElement('div');
     newEntry.classList.add('workout-entry', 'mb-3');
     newEntry.id = entryId;
-    newEntry.innerHTML = "`
-        <div class=\"input-group\">
-            <select class=\"form-select workout-type\" style=\"flex-grow: 2;\">${WORKOUT_OPTIONS}</select>
-            <input type=\"number\" class=\"form-control workout-reps\" placeholder=\"回数\">
-            <button type=\"button\" class=\"btn btn-outline-danger remove-workout-btn\">×</button>
-        </div>
-    ";
+    newEntry.innerHTML = 
+        '<div class="input-group">' +
+            '<select class="form-select workout-type" style="flex-grow: 2;">' + WORKOUT_OPTIONS + '</select>' +
+            '<input type="number" class="form-control workout-reps" placeholder="回数">' +
+            '<button type="button" class="btn btn-outline-danger remove-workout-btn">×</button>'
+        '</div>';
 
     workoutEntriesContainer.appendChild(newEntry);
 
@@ -120,8 +119,8 @@ function clearWorkoutHistory() {
  * Gathers all workout data and initiates the transaction.
  */
 async function createAndSendTransaction() {
-    const recipientAddressValue = recipientAddressInput.value;
-    if (!recipientAddressValue) {
+    const recipientAddressInput = document.getElementById('recipientAddress');
+    if (!recipientAddressInput) {
         alert("受信者のSYMBOLアドレスを入力してください。");
         return;
     }
@@ -145,13 +144,13 @@ async function createAndSendTransaction() {
     }
 
     try {
-        sym.Address.createFromRawAddress(recipientAddressValue);
+        sym.Address.createFromRawAddress(recipientAddressInput.value);
     } catch (error) {
         alert("アドレスの形式が正しくないようです。");
         return;
     }
 
-    localStorage.setItem('lastUsedAddress', recipientAddressValue);
+    localStorage.setItem('lastUsedAddress', recipientAddressInput.value);
 
     const button = document.querySelector('#transferForm button[onclick="createAndSendTransaction()"]');
     button.disabled = true;
@@ -162,7 +161,7 @@ async function createAndSendTransaction() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                recipientAddress: recipientAddressValue, 
+                recipientAddress: recipientAddressInput.value, 
                 workouts: workouts
             }),
         });
@@ -181,7 +180,7 @@ async function createAndSendTransaction() {
             estimatedCaloriesDisplay.textContent = `総消費カロリー: ${data.estimatedCalories.toFixed(1)} kcal`;
         }
         transactionDetails.classList.remove('d-none');
-        getAndDisplayTokenBalance(recipientAddressValue);
+        getAndDisplayTokenBalance(recipientAddressInput.value);
         document.getElementById('shareButton').style.display = 'block';
         document.getElementById('copyTextButton').style.display = 'block';
 
@@ -245,14 +244,14 @@ async function getAndDisplayTokenBalance(address) {
             const backgroundIndex = Math.min(currentLevelIndex, 9);
             bodyElement.className = `background-${backgroundIndex}`;
 
-            document.getElementById('currentLevelBadge').src = `level${currentLevelIndex}_badge.svg`;
+            document.getElementById('currentLevelBadge').src = `/level${currentLevelIndex}_badge.svg`;
             
         } else {
             tokenBalanceElement.textContent = 'トークンを保有していません';
             bodyElement.classList.add('background-0');
             document.getElementById('levelDisplay').textContent = `レベル: ビギナー (0%)`;
             document.querySelector('.progress-bar').style.width = `0%`;
-            document.getElementById('currentLevelBadge').src = `level0_badge.svg`;
+            document.getElementById('currentLevelBadge').src = `/level0_badge.svg`;
         }
     } catch (error) {
         console.error(error);
@@ -284,7 +283,7 @@ async function shareOnSns() {
     }
 
     const backgroundIndex = Math.min(currentLevelIndex, 9);
-    const backgroundImageSrc = `${backgroundIndex}.png`;
+    const backgroundImageSrc = `/${backgroundIndex}.png`;
 
     const loadImage = src => new Promise((resolve, reject) => {
         const img = new Image();
