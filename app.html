@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Transfer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://xembook.github.io/nem2-browserify/symbol-sdk-2.0.4.js"></script>
+</head>
+<body class="background-0">
+
+    <div class="main-action-container text-center">
+        <h1 class="display-3 fw-bolder text-white text-shadow">KINNIKU-TOKEN<br>CHALLENGE</h1>
+        <p class="lead fw-normal text-white-50 mb-4 text-shadow">今日の筋トレを記録し、報酬を掴み取れ</p>
+        <button id="open-drawer-button">チャレンジに参加する</button>
+        <button id="open-info-button" class="mt-3">使い方・ウォレット作成</button>
+    </div>
+
+    <div id="drawer-overlay" class="hidden"></div>
+
+    <div id="transaction-drawer">
+        <button id="close-drawer-button">&times;</button>
+        
+        <div class="card glass-card h-100">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title text-center mb-4">筋トレ報酬獲得</h3>
+
+                <div id="tokenBalance" class="alert alert-info text-center fw-bold" role="alert">
+                    保有トークン数量: 0 KINNIKU-TOKEN
+                </div>
+
+                <!-- Progress Bar / Level System -->
+                <div class="mb-3">
+                    <p class="text-center mb-1 fw-bold" id="levelDisplay">レベル: ビギナー (0%)</p>
+                    <div class="text-center mb-2">
+                        <img id="currentLevelBadge" src="level0_badge.svg" alt="現在のレベルバッジ" class="img-fluid" style="max-width: 80px;">
+                    </div>
+                    <div class="progress" role="progressbar" aria-label="Level Progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-success" style="width: 0%"></div>
+                    </div>
+                </div>
+            
+                <div id="transactionDetails" class="alert alert-success mt-3 d-none" role="alert">
+                    <p id="message" class="mb-0">message: </p>
+                    <p id="estimatedCaloriesDisplay" class="mb-0 mt-2"></p>
+                </div>
+
+                <p id="siteDescription" class="text-center text-muted mb-4">あなたのSYMBOLアドレスと筋トレ回数を入力し、報酬獲得ボタンを押してください。</p>
+                
+                <form id="transferForm">
+                    <div class="mb-3">
+                        <label for="recipientAddress" class="form-label">受信者のSYMBOLアドレス</label>
+                        <input type="text" class="form-control" id="recipientAddress" name="recipientAddress" required>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div id="workout-entries-container">
+                        <!-- 筋トレ種目の入力欄はここに動的に追加されます -->
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-success" id="add-workout-btn">＋ 種目を追加</button>
+                        <button type="button" class="btn btn-primary btn-lg" onclick="createAndSendTransaction()">報酬を獲得</button>
+                    </div>
+                </form>
+
+                <div class="d-grid mt-3">
+                    <button id="shareButton" class="btn btn-success btn-lg" style="display: none;">結果をSNSで共有</button>
+                    <button id="copyTextButton" class="btn btn-secondary btn-lg mt-2" style="display: none;">投稿文をコピー</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="shareCanvas" width="1080" height="1080" style="display: none;"></canvas>
+
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">使い方・ウォレット作成について</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>KINNIKU-TOKEN CHALLENGEへようこそ！</h4>
+                    <p>このアプリは、あなたの筋力トレーニングの努力を「KINNIKU-TOKEN」として報酬に変え、モチベーションを最大限に引き出すためのものです。</p>
+                    <h5>アプリの使い方</h5>
+                    <ol>
+                        <li>「チャレンジに参加する」ボタンから、あなたのSymbolアドレスと筋トレ回数を入力します。</li>
+                        <li>「報酬を獲得」ボタンを押すと、入力した筋トレ回数に応じたKINNIKU-TOKENがあなたのウォレットに送られます。</li>
+                        <li>保有トークン数に応じて、あなたのレベルが上がり、背景も変化します。マッスルマスターを目指しましょう！</li>
+                        <li>AIトレーナーからの熱いメッセージで、さらなるモチベーションアップ！</li>
+                    </ol>
+                    <h5>KINNIKU-TOKENを受け取るには？</h5>
+                    <p>KINNIKU-TOKENや応援メッセージを受け取るには、「Symbolアドレス」という、あなた専用のデジタルの受け取り場所が必要です。これは銀行の口座番号のようなもので、安全にトークンを保管するために使われます。</p>
+                    <a href="https://symbol-community.com/ja/docs/1" target="_blank" rel="noopener noreferrer">こちらの公式サイトの案内に沿って、ウォレット（お財布）を作成し、あなたのアドレスを取得しましょう。</a>
+                    <p class="mt-2">作成は数分で完了します！</p>
+                    <h5 class="mt-4">レベルバッジ</h5>
+                    <p>あなたの筋トレの成果は、特別なバッジとして称えられます。保有トークン数に応じて、以下のバッジを獲得できます。</p>
+                    <div class="badge-list row">
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level0_badge.svg" alt="ビギナーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>ビギナー</strong></p>
+                            <small>0 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level1_badge.svg" alt="ルーキーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>ルーキー</strong></p>
+                            <small>1,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level2_badge.svg" alt="マッスル見習いバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>マッスル見習い</strong></p>
+                            <small>2,500 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level3_badge.svg" alt="中級マッスルバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>中級マッスル</strong></p>
+                            <small>5,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level4_badge.svg" alt="ベテラントレーニーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>ベテラントレーニー</strong></p>
+                            <small>10,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level5_badge.svg" alt="プロビルダーバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>プロビルダー</strong></p>
+                            <small>15,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level6_badge.svg" alt="筋肉の賢者バッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>筋肉の賢者</strong></p>
+                            <small>25,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level7_badge.svg" alt="鋼の肉体バッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>鋼の肉体</strong></p>
+                            <small>37,500 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level8_badge.svg" alt="神の領域バッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>神の領域</strong></p>
+                            <small>50,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level9_badge.svg" alt="レジェンドバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>レジェンド</strong></p>
+                            <small>75,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                        <div class="badge-item col-6 col-md-4 text-center mb-3">
+                            <img src="level10_badge.svg" alt="マッスルマスターバッジ" class="level-badge img-fluid">
+                            <p class="mb-0"><strong>マッスルマスター</strong></p>
+                            <small>100,000 KINNIKU-TOKEN 以上</small>
+                        </div>
+                    </div>
+                    <h6 class="mt-4 fw-bold">無限の頂へ：「プラスレベル」</h6>
+                    <p>「マッスルマスター」は終点ではありません。それは新たな始まりです。マッスルマスターに到達後、さらに25,000トークンを獲得するごとに「+1」「+2」とレベルが上がり続けます。あなたの筋肉の限界に、終わりはありません！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <footer class="text-center text-white-50 mt-5 mb-3" style="font-size: 0.8em;">
+        <p>&copy; 2025 XYMZAP. All rights reserved.</p>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
