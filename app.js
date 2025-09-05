@@ -61,9 +61,11 @@ function renderWorkoutHistory() {
     historyContainer.querySelectorAll('.delete-history-btn').forEach(button => {
         button.addEventListener('click', (event) => {
             const workoutTypeToDelete = event.target.dataset.workoutType;
-            delete workoutHistory[workoutTypeToDelete];
-            saveWorkoutHistory();
-            renderWorkoutHistory(); // 表示を更新
+            if (window.confirm('本当に削除しますか？')) {
+                delete workoutHistory[workoutTypeToDelete];
+                saveWorkoutHistory();
+                renderWorkoutHistory(); // 表示を更新
+            }
         });
     });
 }
