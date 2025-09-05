@@ -23,6 +23,13 @@ const WORKOUT_JAPANESE_NAMES = {
     squats: 'スクワット',
     back_extensions: '背筋'
 };
+const WORKOUT_JAPANESE_NAMES = {
+    general: '筋トレ全般',
+    crunches: '腹筋',
+    pushups: '腕立て伏せ',
+    squats: 'スクワット',
+    back_extensions: '背筋'
+};
 
 // --- DOM Elements ---
 const recipientAddressInput = document.getElementById('recipientAddress');
