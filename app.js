@@ -16,11 +16,22 @@ const WORKOUT_OPTIONS = `
     <option value="squats">スクワット</option>
     <option value="back_extensions">背筋</option>
 `;
+const WORKOUT_JAPANESE_NAMES = {
+    general: '筋トレ全般',
+    crunches: '腹筋',
+    pushups: '腕立て伏せ',
+    squats: 'スクワット',
+    back_extensions: '背筋'
+};
 
 // --- DOM Elements ---
 const recipientAddressInput = document.getElementById('recipientAddress');
 const workoutEntriesContainer = document.getElementById('workout-entries-container');
 const addWorkoutBtn = document.getElementById('add-workout-btn');
+const showHistoryBtn = document.getElementById('show-history-btn');
+const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+const historyModalBody = document.getElementById('history-modal-body');
+const clearHistoryBtn = document.getElementById('clear-history-btn');
 
 // --- Core Functions ---
 
@@ -42,13 +53,67 @@ function addWorkoutEntry() {
 
     workoutEntriesContainer.appendChild(newEntry);
 
-    // Add event listener to the new remove button
     newEntry.querySelector('.remove-workout-btn').addEventListener('click', () => {
-        // Prevent removing the last entry
         if (workoutEntriesContainer.children.length > 1) {
             newEntry.remove();
         }
     });
+}
+
+/**
+ * Saves the successful workout to localStorage.
+ * @param {Array<object>} workouts - Array of workout objects [{type, reps}].
+ */
+function saveWorkoutToHistory(workouts) {
+    const history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
+    const newHistoryEntry = {
+        date: new Date().toISOString(),
+        workouts: workouts
+    };
+    history.push(newHistoryEntry);
+    localStorage.setItem('workoutHistory', JSON.stringify(history));
+}
+
+/**
+ * Displays the aggregated workout history in the modal.
+ */
+function showWorkoutHistory() {
+    const history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
+    if (history.length === 0) {
+        historyModalBody.innerHTML = '<p>まだ履歴はありません。</p>';
+        historyModal.show();
+        return;
+    }
+
+    const stats = {};
+    history.forEach(entry => {
+        entry.workouts.forEach(workout => {
+            if (!stats[workout.type]) {
+                stats[workout.type] = 0;
+            }
+            stats[workout.type] += workout.reps;
+        });
+    });
+
+    let statsHtml = '<ul class="list-group">';
+    for (const type in stats) {
+        const workoutName = WORKOUT_JAPANESE_NAMES[type] || type;
+        statsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white">${workoutName}<span class="badge bg-primary rounded-pill">${stats[type]}回</span></li>`;
+    }
+    statsHtml += '</ul>';
+
+    historyModalBody.innerHTML = statsHtml;
+    historyModal.show();
+}
+
+/**
+ * Clears all workout history from localStorage.
+ */
+function clearWorkoutHistory() {
+    if (confirm('本当にすべての履歴を削除しますか？この操作は元に戻せません。')) {
+        localStorage.removeItem('workoutHistory');
+        historyModalBody.innerHTML = '<p>履歴が削除されました。</p>';
+    }
 }
 
 /**
@@ -106,6 +171,9 @@ async function createAndSendTransaction() {
         if (!response.ok) {
             throw new Error(data.message || '不明なエラーが発生しました。');
         }
+
+        // --- Save to history on success ---
+        saveWorkoutToHistory(workouts);
 
         const transactionDetails = document.getElementById('transactionDetails');
         const estimatedCaloriesDisplay = document.getElementById('estimatedCaloriesDisplay');
@@ -343,8 +411,11 @@ window.addEventListener('load', function () {
         recipientAddressInput.addEventListener('input', () => getAndDisplayTokenBalance(recipientAddressInput.value));
     }
 
-    addWorkoutBtn.addEventListener('click', addWorkoutEntry); 
+    addWorkoutBtn.addEventListener('click', addWorkoutEntry);
     addWorkoutEntry(); // Add the first entry on page load
+
+    showHistoryBtn.addEventListener('click', showWorkoutHistory);
+    clearHistoryBtn.addEventListener('click', clearWorkoutHistory);
 
     const openDrawerButton = document.getElementById('open-drawer-button');
     const closeDrawerButton = document.getElementById('close-drawer-button');
