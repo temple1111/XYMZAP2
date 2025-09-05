@@ -48,6 +48,7 @@ async function createAndSendTransaction() {
             },
             body: JSON.stringify({ 
                 recipientAddress: recipientAddressValue, 
+                workoutType: workoutTypeValue,
                 amount: parseInt(amountValue) 
             }),
         });

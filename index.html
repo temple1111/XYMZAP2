@@ -54,7 +54,16 @@
                         <input type="text" class="form-control" id="recipientAddress" name="recipientAddress" required>
                     </div>
                     <div class="mb-3">
-                        <label for="amount" class="form-label">筋トレ回数</label>
+                        <label for="workoutType" class="form-label">筋トレ種目</label>
+                        <select class="form-select" id="workoutType" name="workoutType">
+                            <option value="crunches" selected>腹筋</option>
+                            <option value="pushups">腕立て伏せ</option>
+                            <option value="squats">スクワット</option>
+                            <option value="back_extensions">背筋</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">回数</label>
                         <input type="number" class="form-control" id="amount" name="amount" required>
                     </div>
                     <div class="d-grid">
