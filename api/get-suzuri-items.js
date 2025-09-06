@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const response = await fetch(`https://suzuri.jp/api/v1/users/${suzuriUserId}/products`, {
+    const response = await fetch(`https://suzuri.jp/api/v1/choices/220256/products?userName=${suzuriUserId}`, {
       headers: {
         'Content-Type': 'application/json',
       },
