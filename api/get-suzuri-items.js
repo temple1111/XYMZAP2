@@ -8,11 +8,10 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const response = await fetch(`https://suzuri.jp/api/v1/products?name=${suzuriUserId}`, {
-      method: 'GET',
+    const response = await fetch(`https://suzuri.jp/api/v1/users/${suzuriUserId}/products`, {
       headers: {
-        'Authorization': `Bearer ${suzuriApiKey}`
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
