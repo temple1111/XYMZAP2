@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const response = await fetch(`https://suzuri.jp/api/v1/user/${suzuriUserId}/items`, {
+    const response = await fetch(`https://suzuri.jp/api/v1/users/${suzuriUserId}/items`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${suzuriApiKey}`
