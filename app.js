@@ -1,7 +1,7 @@
 // --- Frontend Logic ---
 const NODE = 'https://xym.jp1.node.leywapool.com:3001';
-const sym = require("/node_modules/symbol-sdk");
-const repo = new sym.RepositoryFactoryHttp(NODE);
+const symbolSdk = window.symbolSdk;
+const repo = new symbolSdk.RepositoryFactoryHttp(NODE);
 
 let workoutHistory = {}; // 筋トレ履歴を保持するオブジェクト
 
@@ -149,7 +149,7 @@ async function createAndSendTransaction() {
     }
 
     try {
-        sym.Address.createFromRawAddress(recipientAddressValue);
+        symbolSdk.Address.createFromRawAddress(recipientAddressValue);
     } catch (error) {
         alert(getTranslation('alert_invalid_address'));
         return;
@@ -219,7 +219,7 @@ async function getAndDisplayTokenBalance(address) {
 
     try {
         const accountHttp = repo.createAccountRepository();
-        const accountAddress = sym.Address.createFromRawAddress(address);
+        const accountAddress = symbolSdk.Address.createFromRawAddress(address);
         const accountInfo = await accountHttp.getAccountInfo(accountAddress).toPromise();
         const tokenBalance = accountInfo.mosaics.find(mosaic => mosaic.id.toHex() === tokenId);
 
@@ -474,8 +474,8 @@ window.addEventListener('load', function () {
     if (createWalletBtn) {
         createWalletBtn.addEventListener('click', () => {
             // 1. Generate new account
-            const account = sym.Account.generateNewAccount(sym.NetworkType.MAIN_NET);
-            const mnemonic = sym.Mnemonic.generate();
+            const account = symbolSdk.Account.generateNewAccount(symbolSdk.NetworkType.MAIN_NET);
+            const mnemonic = new symbolSdk.Mnemonic(symbolSdk.hd.Mnemonic.generateMnemonic());
 
             // 2. Display credentials in the modal
             document.getElementById('newAddress').value = account.address.plain();
