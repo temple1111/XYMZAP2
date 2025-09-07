@@ -468,6 +468,62 @@ window.addEventListener('load', function () {
     if (copyTextButton) {
         copyTextButton.addEventListener('click', copyShareText);
     }
+
+    // --- Wallet Creation Logic ---
+    const createWalletBtn = document.getElementById('create-wallet-btn');
+    if (createWalletBtn) {
+        createWalletBtn.addEventListener('click', () => {
+            // 1. Generate new account
+            const account = sym.Account.generateNewAccount(sym.NetworkType.MAIN_NET);
+            const mnemonic = sym.Mnemonic.generate();
+
+            // 2. Display credentials in the modal
+            document.getElementById('newAddress').value = account.address.plain();
+            document.getElementById('newPrivateKey').value = account.privateKey;
+            document.getElementById('newMnemonic').value = mnemonic.plain;
+
+            // 3. Show the modal
+            const createWalletModal = new bootstrap.Modal(document.getElementById('createWalletModal'));
+            createWalletModal.show();
+        });
+    }
+
+    // Copy buttons in create wallet modal
+    document.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const targetId = event.target.dataset.clipboardTarget;
+            const targetElement = document.querySelector(targetId);
+            navigator.clipboard.writeText(targetElement.value).then(() => {
+                event.target.textContent = getTranslation('copied_alert');
+                setTimeout(() => {
+                    event.target.textContent = getTranslation('copy_button');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        });
+    });
+
+    // "Use this wallet" button
+    const useNewWalletBtn = document.getElementById('use-new-wallet-btn');
+    if (useNewWalletBtn) {
+        useNewWalletBtn.addEventListener('click', () => {
+            const newAddress = document.getElementById('newAddress').value;
+            recipientAddressInput.value = newAddress;
+            getAndDisplayTokenBalance(newAddress);
+            const createWalletModal = bootstrap.Modal.getInstance(document.getElementById('createWalletModal'));
+            createWalletModal.hide();
+            const infoModal = bootstrap.Modal.getInstance(document.getElementById('infoModal'));
+            if (infoModal) {
+                infoModal.hide();
+            }
+             // Open the main drawer after setting the address
+            const drawer = document.getElementById('transaction-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            drawer.classList.add('is-open');
+            overlay.classList.remove('hidden');
+        });
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
