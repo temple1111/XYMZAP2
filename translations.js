@@ -1,6 +1,6 @@
 
 
-const translations = {
+module.exports = {
   ja: {
     // index.html
     "title_index": "KINNIKU-TOKEN CHALLENGE - 筋トレに、新たな価値を。",

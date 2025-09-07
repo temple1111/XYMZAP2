@@ -1,3 +1,5 @@
+const translations = require('./translations.js');
+
 // --- Frontend Logic ---
 const NODE = 'https://xym.jp1.node.leywapool.com:3001';
 const sym = require('symbol-sdk');
@@ -469,12 +471,14 @@ window.addEventListener('load', function () {
         copyTextButton.addEventListener('click', copyShareText);
     }
 
+    window.createAndSendTransaction = createAndSendTransaction;
     // --- Wallet Creation Logic ---
     const createWalletBtn = document.getElementById('create-wallet-btn');
     if (createWalletBtn) {
         createWalletBtn.addEventListener('click', () => {
             // 1. Generate new account
             const account = sym.Account.generateNewAccount(sym.NetworkType.MAIN_NET);
+            console.log(sym);
             const mnemonic = sym.Mnemonic.generate();
 
             // 2. Display credentials in the modal
