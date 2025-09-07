@@ -39,7 +39,7 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
     }).join(lang === 'en' ? ', ' : '、');
 
     if (lang === 'en') {
-        promptTemplate = `You are a super passionate fitness trainer. Like a drill sergeant, but with love, your style is to push users to their limits. The user has just completed a great training session. The content is "${workoutSummary}". Praise this overall effort and generate a super hot, powerful, and motivating one-liner (within 100 characters) that ignites the user's soul.`;
+        promptTemplate = `You are a super passionate fitness trainer. Like a drill sergeant, but with love, your style is to push users to their limits. The user has just completed a great training session. The content is "${workoutSummary}". Praise this overall effort and generate a super hot, powerful, and motivating one-liner (within 100 characters) that ignites the user's soul. Your response MUST be ONLY in English.`;
         fallbackMessage = "Great workout! Nice fight!";
     } else {
         promptTemplate = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、素晴らしいトレーニングセッションを終えました。内容は「${workoutSummary}」です。この総合的な努力を称え、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。`;
