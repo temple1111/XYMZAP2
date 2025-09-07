@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Frontend Logic ---
     const NODE = 'https://xym.jp1.node.leywapool.com:3001';
-    const symbolSdk = window.symbolSdk;
-    const repo = new symbolSdk.RepositoryFactoryHttp(NODE);
+    const symbol = window.symbol;
+    const repo = new symbol.RepositoryFactoryHttp(NODE);
 
     let workoutHistory = {}; // 筋トレ履歴を保持するオブジェクト
 
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            symbolSdk.Address.createFromRawAddress(recipientAddressValue);
+            symbol.Address.createFromRawAddress(recipientAddressValue);
         } catch (error) {
             alert(getTranslation('alert_invalid_address'));
             return;
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const accountHttp = repo.createAccountRepository();
-            const accountAddress = symbolSdk.Address.createFromRawAddress(address);
+            const accountAddress = symbol.Address.createFromRawAddress(address);
             const accountInfo = await accountHttp.getAccountInfo(accountAddress).toPromise();
             const tokenBalance = accountInfo.mosaics.find(mosaic => mosaic.id.toHex() === tokenId);
 
@@ -476,8 +476,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (createWalletBtn) {
             createWalletBtn.addEventListener('click', () => {
                 // 1. Generate new account
-                const account = symbolSdk.Account.generateNewAccount(symbolSdk.NetworkType.MAIN_NET);
-                const mnemonic = new symbolSdk.Mnemonic(symbolSdk.hd.Mnemonic.generateMnemonic());
+                const account = symbol.Account.generateNewAccount(symbol.NetworkType.MAIN_NET);
+                const mnemonic = new symbol.Mnemonic(symbol.hd.Mnemonic.generateMnemonic());
 
                 // 2. Display credentials in the modal
                 document.getElementById('newAddress').value = account.address.plain();
