@@ -4,7 +4,8 @@
   "description": "API for XYMZAP",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify app.js -o bundle.js"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +13,8 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "symbol-sdk": "^2.0.4"
+  },
+  "devDependencies": {
+    "browserify": "^17.0.0"
   }
 }
