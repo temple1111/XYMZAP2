@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('window object:', window);
+    console.log('symbolSdk object:', window.symbolSdk);
+
     // --- Frontend Logic ---
     const NODE = 'https://xym.jp1.node.leywapool.com:3001';
     const symbolSdk = window.symbolSdk;
