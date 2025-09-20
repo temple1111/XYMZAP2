@@ -115,7 +115,7 @@ const translations = {
     "share_failed_alert": "共有に失敗しました。画像をダウンロードします。",
     "share_unsupported_alert": "お使いのブラウザは共有機能をサポートしていません。画像をダウンロードします。",
     "image_generation_failed_alert": "共有画像の生成に失敗しました。",
-    "share_text": "筋トレ報告！　筋トレを始めて、KINNIKU-TOKENを手に入れよう！ #symbol #XYM #筋トレ #fitness",
+    "share_text": "筋トレ報告！　筋トレを始めて、KINNIKU-TOKENを手に入れよう！ #symbol #XYM #筋トレ #fitness\n",
     "copied_alert": "コピーしました！",
     "copy_text_button_initial": "投稿文をコピー",
     "copy_failed_alert": "コピーに失敗しました。",
