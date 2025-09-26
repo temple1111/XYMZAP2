@@ -1,6 +1,6 @@
 // [1] CommonJS 形式でインポート可能なモジュール（rxjs、Google AI）を require で読み込みます。
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const rxjs = require('rxjs'); // RxJSは CommonJS で require することで互換性を確保
+const rxjs = require('rxjs'); 
 
 // --- Symbol-related constants ---
 const NODE = 'https://xym.jp1.node.leywapool.com:3001'; 
@@ -25,9 +25,7 @@ const WORKOUT_SETTINGS = {
 
 /**
  * Generates a motivational message for multiple workouts.
- * @param {Array<object>} workouts - Array of workout objects.
- * @param {string} lang - The desired language for the message ('ja' or 'en').
- * @returns {Promise<string>} A motivational message.
+ * ... (中略) ...
  */
 async function generateTransactionMessage(workouts, lang = 'ja') {
     let promptTemplate;
@@ -61,26 +59,18 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
 // API エンドポイントのハンドラー
 // =========================================================================
 module.exports = async (req, res) => {
-    // [2] Symbol SDK をダイナミックインポート (ERR_REQUIRE_ESM 対策)
+    // [2] Symbol SDK をダイナミックインポート (ESM 対策)
+    // 展開せずに、すべてのクラスを symbol.Class の形式で参照します。
     const symbol = await import('symbol-sdk');
     const lastValueFrom = rxjs.lastValueFrom; // [3] requireした rxjs から lastValueFrom を取得
 
-    // Symbol SDKのクラスを展開
-    const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = symbol;
+    // ❌ symbol の中身を展開する以下の行は不要 (TypeError 対策)
+    // const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = symbol;
 
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
-
-    if (!PRIVATE_KEY) {
-        return res.status(500).json({ message: 'Server configuration error: Private key not set.' });
-    }
-
-    const { recipientAddress, workouts, lang } = req.body;
-
-    if (!recipientAddress || !Array.isArray(workouts) || workouts.length === 0) {
-        return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
-    }
+    // ... (中略: 初期チェック) ...
 
     try {
         let totalTokenAmount = 0;
@@ -102,41 +92,40 @@ module.exports = async (req, res) => {
         }
 
         const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
-        const txMessage = PlainMessage.create(generatedMessage);
+        
+        // [4] PlainMessage.create の参照を修正
+        const txMessage = symbol.PlainMessage.create(generatedMessage);
 
-        const repoFactory = new RepositoryFactoryHttp(NODE);
+        // [4] RepositoryFactoryHttp の参照を修正
+        const repoFactory = new symbol.RepositoryFactoryHttp(NODE);
 
-        // [4] toPromise() を lastValueFrom に置き換え
+        // lastValueFrom を使用して非同期処理を実行
         const networkType = await lastValueFrom(repoFactory.getNetworkType());
         const generationHash = await lastValueFrom(repoFactory.getGenerationHash());
         
-        // ネットワークのプロパティからエポック調整値を取得 (v3系では必須)
         const networkRepository = repoFactory.createNetworkRepository();
         const networkProperties = await lastValueFrom(networkRepository.getNetworkProperties());
         // v3系では UInt64 オブジェクトを number/BigInt に変換
         const epochAdjustment = networkProperties.network.epochAdjustment.compact(); 
 
-        const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
-        const recipient = Address.createFromRawAddress(recipientAddress);
+        // [4] Account と Address の参照を修正
+        const senderAccount = symbol.Account.createFromPrivateKey(PRIVATE_KEY, networkType);
+        const recipient = symbol.Address.createFromRawAddress(recipientAddress);
 
-        // [5] v3.3.0 に合わせた TransferTransaction の修正
-        const transferTransaction = TransferTransaction.create(
-            // Deadline の作成にエポック調整値を使用
-            Deadline.create(epochAdjustment), 
+        // [4][5] v3.3.0 に合わせた TransferTransaction の修正
+        const transferTransaction = symbol.TransferTransaction.create(
+            // Deadline と UInt64 の参照を修正
+            symbol.Deadline.create(epochAdjustment), 
             recipient,
-            // 数量は UInt64.fromUint で渡す
-            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(totalTokenAmount))],
+            [new symbol.Mosaic(new symbol.MosaicId('44FD959F9F2ECF4D'), symbol.UInt64.fromUint(totalTokenAmount))],
             txMessage,
             networkType,
-            // 最終引数で maxFee を指定 (v3系での推奨形式)
-            UInt64.fromUint(1000000) 
+            // 最終引数で maxFee を指定
+            symbol.UInt64.fromUint(1000000) 
         );
-        // ❌ .setMaxFee(100) は不要
-        
-        const signedTx = senderAccount.sign(transferTransaction, generationHash);
         
         const transactionHttp = repoFactory.createTransactionRepository();
-        await lastValueFrom(transactionHttp.announce(signedTx)); // lastValueFrom を使用
+        await lastValueFrom(transactionHttp.announce(signedTx)); 
 
         res.status(200).json({ 
             message: 'Transaction announced successfully!', 
