@@ -1,10 +1,17 @@
-// [1] CommonJS 形式でインポート可能なモジュール（rxjs、Google AI）を require で読み込みます。
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const rxjs = require('rxjs'); 
+// 🚨 [1] すべての require() を import に置き換えます
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { lastValueFrom } from 'rxjs'; // lastValueFrom を直接インポート
+import * as symbol from 'symbol-sdk'; // Symbol SDK 全体を as symbol でインポート
+
+// 🚨 [2] module.exports = ... を export default に置き換えます
+// ただし、サーバーレス環境が export default をサポートしない場合があるため、
+// 環境によっては const handler = ...; export { handler }; の形式が必要です。
+// ここでは module.exports を維持し、その中のロジックをESM構文にします。
 
 // --- Symbol-related constants ---
 const NODE = 'https://xym.jp1.node.leywapool.com:3001'; 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
+// ... (中略: Gemini設定、Workout設定) ...
 
 // --- Gemini-related setup ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -27,6 +34,7 @@ const WORKOUT_SETTINGS = {
  * Generates a motivational message for multiple workouts.
  */
 async function generateTransactionMessage(workouts, lang = 'ja') {
+    // ... (関数の中身は変更なし) ...
     let promptTemplate;
     let fallbackMessage;
 
@@ -54,16 +62,18 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
     }
 }
 
+
 // =========================================================================
 // API エンドポイントのハンドラー
 // =========================================================================
-module.exports = async (req, res) => {
+export default async (req, res) => { // 🚨 サーバーレス環境に合わせて module.exports 形式に戻す
+// module.exports = async (req, res) => { 
     
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    // req.body から変数を最優先で取得
+    // req.body から変数を取得
     const { recipientAddress, workouts, lang } = req.body; 
 
     if (!PRIVATE_KEY) {
@@ -75,16 +85,7 @@ module.exports = async (req, res) => {
         return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
     }
 
-    // [2] Symbol SDK をダイナミックインポート (ESM 対策)
-    const symbol = await import('symbol-sdk');
-    const lastValueFrom = rxjs.lastValueFrom; 
-
-    // 🚨 最終修正: symbol の default プロパティから必要なクラスをすべて展開
-    const { 
-        Account, Address, Deadline, Mosaic, MosaicId, NetworkType, 
-        PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 
-    } = symbol.default || symbol; // default がなければ symbol から展開 (保険)
-
+    // 🚨 修正: symbol.* の形式でクラスを参照 (インポート時に * as symbol したため)
     try {
         let totalTokenAmount = 0;
         let totalCalories = 0;
@@ -106,10 +107,10 @@ module.exports = async (req, res) => {
 
         const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
         
-        // 🚨 クラス名にプレフィックスなしで直接アクセス
-        const txMessage = PlainMessage.create(generatedMessage);
+        // 🚨 symbol.PlainMessage.create を使用
+        const txMessage = symbol.PlainMessage.create(generatedMessage);
 
-        const repoFactory = new RepositoryFactoryHttp(NODE);
+        const repoFactory = new symbol.RepositoryFactoryHttp(NODE);
 
         // lastValueFrom を使用して非同期処理を実行
         const networkType = await lastValueFrom(repoFactory.getNetworkType());
@@ -120,18 +121,18 @@ module.exports = async (req, res) => {
         
         const epochAdjustment = networkProperties.network.epochAdjustment.compact(); 
 
-        // 🚨 クラス名にプレフィックスなしで直接アクセス
-        const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
-        const recipient = Address.createFromRawAddress(recipientAddress);
+        // 🚨 symbol.* を使用
+        const senderAccount = symbol.Account.createFromPrivateKey(PRIVATE_KEY, networkType);
+        const recipient = symbol.Address.createFromRawAddress(recipientAddress);
 
-        // 🚨 クラス名にプレフィックスなしで直接アクセス
-        const transferTransaction = TransferTransaction.create(
-            Deadline.create(epochAdjustment), 
+        // 🚨 symbol.* を使用
+        const transferTransaction = symbol.TransferTransaction.create(
+            symbol.Deadline.create(epochAdjustment), 
             recipient,
-            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(totalTokenAmount))],
+            [new symbol.Mosaic(new symbol.MosaicId('44FD959F9F2ECF4D'), symbol.UInt64.fromUint(totalTokenAmount))],
             txMessage,
             networkType,
-            UInt64.fromUint(1000000) 
+            symbol.UInt64.fromUint(1000000) 
         );
         
         // 署名とアナウンス
@@ -151,3 +152,6 @@ module.exports = async (req, res) => {
         res.status(500).json({ message: 'An error occurred during the transaction process.', error: error.message });
     }
 };
+// 🚨 サーバーレス環境での module.exports の代替
+// 環境に合わせて export default の行を module.exports に変更してください。
+// 例: module.exports = handler; のような形式
