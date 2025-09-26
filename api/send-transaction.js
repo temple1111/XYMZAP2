@@ -12,7 +12,7 @@ if (!GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY is not set in environment variables.');
 }
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-002' });
+const geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 // --- Workout-related constants ---
 const WORKOUT_SETTINGS = {
