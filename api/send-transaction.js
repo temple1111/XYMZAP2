@@ -1,4 +1,4 @@
-const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = require('symbol-sdk');
+//const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = require('symbol-sdk');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // --- Symbol-related constants ---
@@ -59,6 +59,11 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
 }
 
 module.exports = async (req, res) => {
+    
+    // ✅ ここで非同期インポートを行う
+    const symbol = await import('symbol-sdk');
+    const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = symbol;
+    
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
