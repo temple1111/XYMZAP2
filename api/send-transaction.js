@@ -1,10 +1,10 @@
-const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = require('symbol-sdk').default || require('symbol-sdk');
+// --- Google AI (Gemini) のインポートはそのまま維持 ---
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // --- Symbol-related constants ---
-const NODE = 'https://xym.jp1.node.leywapool.com:3001';
+// ⚠️ ノードURLは、お使いの環境に合わせて適切に設定してください
+const NODE = 'https://xym.jp1.node.leywapool.com:3001'; 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const SYMBOL_EPOCH_ADJUSTMENT = 1615853188;
 
 // --- Gemini-related setup ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -16,20 +16,21 @@ const geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 // --- Workout-related constants ---
 const WORKOUT_SETTINGS = {
-    crunches:       { name: '腹筋', name_en: 'Crunches', tokenMultiplier: 1.0, caloriesPerRep: 0.4 },
-    pushups:        { name: '腕立て伏せ', name_en: 'Push-ups', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
-    squats:         { name: 'スクワット', name_en: 'Squats', tokenMultiplier: 1.5, caloriesPerRep: 0.8 },
+    crunches: 	 	{ name: '腹筋', name_en: 'Crunches', tokenMultiplier: 1.0, caloriesPerRep: 0.4 },
+    pushups: 	 	{ name: '腕立て伏せ', name_en: 'Push-ups', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
+    squats: 	 	{ name: 'スクワット', name_en: 'Squats', tokenMultiplier: 1.5, caloriesPerRep: 0.8 },
     back_extensions: { name: '背筋', name_en: 'Back Extensions', tokenMultiplier: 1.2, caloriesPerRep: 0.5 },
     general_workout: { name: '筋トレ全般', name_en: 'General Workout', tokenMultiplier: 1.0, caloriesPerRep: 0.5 },
 };
 
 /**
  * Generates a motivational message for multiple workouts.
- * @param {Array<object>} workouts - Array of workout objects, e.g., [{name: 'スクワット', reps: 50}]
+ * @param {Array<object>} workouts - Array of workout objects.
  * @param {string} lang - The desired language for the message ('ja' or 'en').
  * @returns {Promise<string>} A motivational message.
  */
 async function generateTransactionMessage(workouts, lang = 'ja') {
+    // ... (この関数は変更なし) ...
     let promptTemplate;
     let fallbackMessage;
 
@@ -52,13 +53,20 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
         return response.text();
     } catch (error) {
         console.error("Error generating message with Gemini:", error);
-        //さらに、エラーメッセージのテキスト部分も確認
         console.error("Gemini Error Message Detail:", error.message);
         return fallbackMessage; // Fallback message
     }
 }
 
+// =========================================================================
+// API エンドポイントのハンドラー
+// =========================================================================
 module.exports = async (req, res) => {
+    // Symbol SDKとRxJSをダイナミックインポート (ERR_REQUIRE_ESM 対策)
+    const symbol = await import('symbol-sdk');
+    const { lastValueFrom } = await import('rxjs');
+
+    const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = symbol;
 
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
@@ -68,7 +76,7 @@ module.exports = async (req, res) => {
         return res.status(500).json({ message: 'Server configuration error: Private key not set.' });
     }
 
-    const { recipientAddress, workouts, lang } = req.body; // Extract lang from request body
+    const { recipientAddress, workouts, lang } = req.body;
 
     if (!recipientAddress || !Array.isArray(workouts) || workouts.length === 0) {
         return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
@@ -79,42 +87,59 @@ module.exports = async (req, res) => {
         let totalCalories = 0;
         const workoutDetailsForPrompt = [];
 
+        // ... [中略: トークンとカロリーの計算ロジックはそのまま] ...
         for (const workout of workouts) {
             const settings = WORKOUT_SETTINGS[workout.type];
             if (!settings || !workout.reps || workout.reps <= 0) {
-                // Skip invalid entries silently or return an error
                 continue;
             }
+            // Math.floorの結果がJavaScriptのnumber型なので、BigInt型のUint64に安全に変換されるよう UInt64.fromUint を使います
             totalTokenAmount += Math.floor(workout.reps * settings.tokenMultiplier);
             totalCalories += workout.reps * settings.caloriesPerRep;
-            workoutDetailsForPrompt.push({ type: workout.type, name: settings.name, reps: workout.reps }); // Pass workout.type
+            workoutDetailsForPrompt.push({ type: workout.type, name: settings.name, reps: workout.reps });
         }
 
         if (totalTokenAmount <= 0) {
             return res.status(400).json({ message: 'No valid workouts provided to calculate a reward.' });
         }
 
-        const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang); // Pass lang to generateTransactionMessage
+        const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
         const txMessage = PlainMessage.create(generatedMessage);
 
         const repoFactory = new RepositoryFactoryHttp(NODE);
-        const networkType = await repoFactory.getNetworkType().toPromise();
-        const generationHash = await repoFactory.getGenerationHash().toPromise();
+
+        // ❌ toPromise() を lastValueFrom に置き換え
+        const networkType = await lastValueFrom(repoFactory.getNetworkType());
+        const generationHash = await lastValueFrom(repoFactory.getGenerationHash());
+        
+        // ネットワークのプロパティからエポック調整値を取得 (v3系では推奨)
+        const networkRepository = repoFactory.createNetworkRepository();
+        const networkProperties = await lastValueFrom(networkRepository.getNetworkProperties());
+        const epochAdjustment = networkProperties.network.epochAdjustment.compact(); // UInt64をnumber/BigIntに変換
+
         const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
         const recipient = Address.createFromRawAddress(recipientAddress);
 
+        // 🚨 v3.3.0 に合わせた TransferTransaction の修正
         const transferTransaction = TransferTransaction.create(
-            Deadline.create(SYMBOL_EPOCH_ADJUSTMENT), 
+            // v3系では、Deadlineの作成時にエポック調整値を明示的に渡すことが必要
+            Deadline.create(epochAdjustment), 
             recipient,
+            // 数量はUInt64オブジェクトで渡します
             [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(totalTokenAmount))],
             txMessage,
-            networkType
-        ).setMaxFee(100);
-
+            networkType,
+            // 最終引数で maxFee を指定 (v3系での推奨形式)
+            UInt64.fromUint(1000000) // 例: 1 XYM = 1,000,000 microXYM
+        );
+        // ❌ .setMaxFee(100) は不要になりました
+        
+        // 署名とアナウンス
         const signedTx = senderAccount.sign(transferTransaction, generationHash);
         
         const transactionHttp = repoFactory.createTransactionRepository();
-        await transactionHttp.announce(signedTx).toPromise();
+        // ❌ toPromise() を lastValueFrom に置き換え
+        await lastValueFrom(transactionHttp.announce(signedTx));
 
         res.status(200).json({ 
             message: 'Transaction announced successfully!', 

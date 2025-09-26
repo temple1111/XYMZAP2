@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "rxjs": "^7.8.2",
     "symbol-sdk": "^3.3.0"
   }
 }
