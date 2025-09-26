@@ -2,21 +2,21 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { lastValueFrom } from 'rxjs'; 
-// 🚨 修正: Symbol SDK は Named Import を削除し、後でダイナミックに読み込みます
 
 // --- Symbol-related constants ---
 const NODE = 'https://xym.jp1.node.leywapool.com:3001'; 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 // --- Gemini-related setup ---
-// ... (中略: Gemini設定、Workout設定、generateTransactionMessage関数は変更なし) ...
-const GEMINI_API_KEY = process.env.PRIVATE_KEY;
+// 🚨 修正箇所: 環境変数名を修正
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 if (!GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY is not set in environment variables.');
 }
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
+// --- Workout-related constants ---
 const WORKOUT_SETTINGS = {
     crunches: 	 	{ name: '腹筋', name_en: 'Crunches', tokenMultiplier: 1.0, caloriesPerRep: 0.4 },
     pushups: 	 	{ name: '腕立て伏せ', name_en: 'Push-ups', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
@@ -25,9 +25,13 @@ const WORKOUT_SETTINGS = {
     general_workout: { name: '筋トレ全般', name_en: 'General Workout', tokenMultiplier: 1.0, caloriesPerRep: 0.5 },
 };
 
+/**
+ * Generates a motivational message for multiple workouts.
+ */
 async function generateTransactionMessage(workouts, lang = 'ja') {
     let promptTemplate;
     let fallbackMessage;
+
     const workoutSummary = workouts.map(w => {
         const workoutName = lang === 'en' && WORKOUT_SETTINGS[w.type] && WORKOUT_SETTINGS[w.type].name_en ? WORKOUT_SETTINGS[w.type].name_en : w.name;
         return lang === 'en' ? `${workoutName} for ${w.reps} reps` : `${workoutName}を${w.reps}回`;
@@ -42,15 +46,18 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
     }
 
     try {
-        const result = await genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }).generateContent(promptTemplate);
+        // 🚨 Gemini呼び出しは、関数内で実行
+        const result = await geminiModel.generateContent(promptTemplate);
         const response = await result.response;
         return response.text();
     } catch (error) {
         console.error("Error generating message with Gemini:", error);
         console.error("Gemini Error Message Detail:", error.message);
-        return fallbackMessage; // Fallback message
+        return fallbackMessage; // 失敗時のフォールバックメッセージ
     }
 }
+
+
 // =========================================================================
 // API エンドポイントのハンドラー
 // =========================================================================
@@ -70,7 +77,7 @@ export default async (req, res) => {
         return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
     }
 
-    // 🚨 究極最終修正: 必要なクラスをローカル関数内で動的にインポートし、展開する
+    // 🚨 修正: Symbol SDKのインポートをtry/catchブロックの前に移動させ、確実に完了させる
     const SymbolSDK = await import('symbol-sdk');
     const { 
         Account, Address, Deadline, Mosaic, MosaicId, NetworkType, 
@@ -98,7 +105,7 @@ export default async (req, res) => {
 
         const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
         
-        // 🚨 ローカル展開されたクラスにアクセス
+        // 🚨 PlainMessage.create には SymbolSDK のインポート完了後にアクセス
         const txMessage = PlainMessage.create(generatedMessage);
 
         const repoFactory = new RepositoryFactoryHttp(NODE);
@@ -111,7 +118,6 @@ export default async (req, res) => {
         
         const epochAdjustment = networkProperties.network.epochAdjustment.compact(); 
 
-        // 🚨 ローカル展開されたクラスにアクセス
         const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
         const recipient = Address.createFromRawAddress(recipientAddress);
 
