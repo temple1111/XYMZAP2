@@ -25,7 +25,6 @@ const WORKOUT_SETTINGS = {
 
 /**
  * Generates a motivational message for multiple workouts.
- * ... (中略) ...
  */
 async function generateTransactionMessage(workouts, lang = 'ja') {
     let promptTemplate;
@@ -59,18 +58,28 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
 // API エンドポイントのハンドラー
 // =========================================================================
 module.exports = async (req, res) => {
-    // [2] Symbol SDK をダイナミックインポート (ESM 対策)
-    // 展開せずに、すべてのクラスを symbol.Class の形式で参照します。
-    const symbol = await import('symbol-sdk');
-    const lastValueFrom = rxjs.lastValueFrom; // [3] requireした rxjs から lastValueFrom を取得
-
-    // ❌ symbol の中身を展開する以下の行は不要 (TypeError 対策)
-    // const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = symbol;
-
+    
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
-    // ... (中略: 初期チェック) ...
+
+    // 🚨 修正箇所: req.body から変数を最優先で取得 (ReferenceError対策)
+    const { recipientAddress, workouts, lang } = req.body; 
+
+    if (!PRIVATE_KEY) {
+        return res.status(500).json({ message: 'Server configuration error: Private key not set.' });
+    }
+    
+    // 🚨 修正箇所: 変数を取得した後で、入力チェックを行う
+    if (!recipientAddress || !Array.isArray(workouts) || workouts.length === 0) {
+        return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
+    }
+
+    // [2] Symbol SDK をダイナミックインポート (ESM 対策)
+    const symbol = await import('symbol-sdk');
+    const lastValueFrom = rxjs.lastValueFrom; // [3] requireした rxjs から lastValueFrom を取得
+
+    // Symbol SDKのクラスを展開する行は削除し、すべて symbol.Class の形式で参照
 
     try {
         let totalTokenAmount = 0;
@@ -114,7 +123,7 @@ module.exports = async (req, res) => {
 
         // [4][5] v3.3.0 に合わせた TransferTransaction の修正
         const transferTransaction = symbol.TransferTransaction.create(
-            // Deadline と UInt64 の参照を修正
+            // Deadline の作成にエポック調整値を使用
             symbol.Deadline.create(epochAdjustment), 
             recipient,
             [new symbol.Mosaic(new symbol.MosaicId('44FD959F9F2ECF4D'), symbol.UInt64.fromUint(totalTokenAmount))],
@@ -123,6 +132,9 @@ module.exports = async (req, res) => {
             // 最終引数で maxFee を指定
             symbol.UInt64.fromUint(1000000) 
         );
+        
+        // 署名とアナウンス
+        const signedTx = senderAccount.sign(transferTransaction, generationHash);
         
         const transactionHttp = repoFactory.createTransactionRepository();
         await lastValueFrom(transactionHttp.announce(signedTx)); 
