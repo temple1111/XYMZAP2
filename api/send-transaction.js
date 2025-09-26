@@ -1,8 +1,8 @@
-// --- Google AI (Gemini) のインポートはそのまま維持 ---
+// [1] CommonJS 形式でインポート可能なモジュール（rxjs、Google AI）を require で読み込みます。
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const rxjs = require('rxjs'); // RxJSは CommonJS で require することで互換性を確保
 
 // --- Symbol-related constants ---
-// ⚠️ ノードURLは、お使いの環境に合わせて適切に設定してください
 const NODE = 'https://xym.jp1.node.leywapool.com:3001'; 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
@@ -30,7 +30,6 @@ const WORKOUT_SETTINGS = {
  * @returns {Promise<string>} A motivational message.
  */
 async function generateTransactionMessage(workouts, lang = 'ja') {
-    // ... (この関数は変更なし) ...
     let promptTemplate;
     let fallbackMessage;
 
@@ -62,10 +61,11 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
 // API エンドポイントのハンドラー
 // =========================================================================
 module.exports = async (req, res) => {
-    // Symbol SDKとRxJSをダイナミックインポート (ERR_REQUIRE_ESM 対策)
+    // [2] Symbol SDK をダイナミックインポート (ERR_REQUIRE_ESM 対策)
     const symbol = await import('symbol-sdk');
-    const { lastValueFrom } = await import('rxjs');
+    const lastValueFrom = rxjs.lastValueFrom; // [3] requireした rxjs から lastValueFrom を取得
 
+    // Symbol SDKのクラスを展開
     const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = symbol;
 
     if (req.method !== 'POST') {
@@ -87,13 +87,11 @@ module.exports = async (req, res) => {
         let totalCalories = 0;
         const workoutDetailsForPrompt = [];
 
-        // ... [中略: トークンとカロリーの計算ロジックはそのまま] ...
         for (const workout of workouts) {
             const settings = WORKOUT_SETTINGS[workout.type];
             if (!settings || !workout.reps || workout.reps <= 0) {
                 continue;
             }
-            // Math.floorの結果がJavaScriptのnumber型なので、BigInt型のUint64に安全に変換されるよう UInt64.fromUint を使います
             totalTokenAmount += Math.floor(workout.reps * settings.tokenMultiplier);
             totalCalories += workout.reps * settings.caloriesPerRep;
             workoutDetailsForPrompt.push({ type: workout.type, name: settings.name, reps: workout.reps });
@@ -108,38 +106,37 @@ module.exports = async (req, res) => {
 
         const repoFactory = new RepositoryFactoryHttp(NODE);
 
-        // ❌ toPromise() を lastValueFrom に置き換え
+        // [4] toPromise() を lastValueFrom に置き換え
         const networkType = await lastValueFrom(repoFactory.getNetworkType());
         const generationHash = await lastValueFrom(repoFactory.getGenerationHash());
         
-        // ネットワークのプロパティからエポック調整値を取得 (v3系では推奨)
+        // ネットワークのプロパティからエポック調整値を取得 (v3系では必須)
         const networkRepository = repoFactory.createNetworkRepository();
         const networkProperties = await lastValueFrom(networkRepository.getNetworkProperties());
-        const epochAdjustment = networkProperties.network.epochAdjustment.compact(); // UInt64をnumber/BigIntに変換
+        // v3系では UInt64 オブジェクトを number/BigInt に変換
+        const epochAdjustment = networkProperties.network.epochAdjustment.compact(); 
 
         const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
         const recipient = Address.createFromRawAddress(recipientAddress);
 
-        // 🚨 v3.3.0 に合わせた TransferTransaction の修正
+        // [5] v3.3.0 に合わせた TransferTransaction の修正
         const transferTransaction = TransferTransaction.create(
-            // v3系では、Deadlineの作成時にエポック調整値を明示的に渡すことが必要
+            // Deadline の作成にエポック調整値を使用
             Deadline.create(epochAdjustment), 
             recipient,
-            // 数量はUInt64オブジェクトで渡します
+            // 数量は UInt64.fromUint で渡す
             [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(totalTokenAmount))],
             txMessage,
             networkType,
             // 最終引数で maxFee を指定 (v3系での推奨形式)
-            UInt64.fromUint(1000000) // 例: 1 XYM = 1,000,000 microXYM
+            UInt64.fromUint(1000000) 
         );
-        // ❌ .setMaxFee(100) は不要になりました
+        // ❌ .setMaxFee(100) は不要
         
-        // 署名とアナウンス
         const signedTx = senderAccount.sign(transferTransaction, generationHash);
         
         const transactionHttp = repoFactory.createTransactionRepository();
-        // ❌ toPromise() を lastValueFrom に置き換え
-        await lastValueFrom(transactionHttp.announce(signedTx));
+        await lastValueFrom(transactionHttp.announce(signedTx)); // lastValueFrom を使用
 
         res.status(200).json({ 
             message: 'Transaction announced successfully!', 
