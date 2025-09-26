@@ -63,14 +63,14 @@ module.exports = async (req, res) => {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    // 🚨 修正箇所: req.body から変数を最優先で取得 (ReferenceError対策)
+    // 🚨 req.body から変数を最優先で取得 (ReferenceError対策)
     const { recipientAddress, workouts, lang } = req.body; 
 
     if (!PRIVATE_KEY) {
         return res.status(500).json({ message: 'Server configuration error: Private key not set.' });
     }
     
-    // 🚨 修正箇所: 変数を取得した後で、入力チェックを行う
+    // 入力チェックを行う
     if (!recipientAddress || !Array.isArray(workouts) || workouts.length === 0) {
         return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
     }
@@ -79,7 +79,8 @@ module.exports = async (req, res) => {
     const symbol = await import('symbol-sdk');
     const lastValueFrom = rxjs.lastValueFrom; // [3] requireした rxjs から lastValueFrom を取得
 
-    // Symbol SDKのクラスを展開する行は削除し、すべて symbol.Class の形式で参照
+    // 🚨 最終的な修正: symbol.default からクラスを取得する (TypeError対策)
+    const symbolCore = symbol.default || symbol; 
 
     try {
         let totalTokenAmount = 0;
@@ -102,11 +103,10 @@ module.exports = async (req, res) => {
 
         const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
         
-        // [4] PlainMessage.create の参照を修正
-        const txMessage = symbol.PlainMessage.create(generatedMessage);
+        // [4] symbolCore を使用してクラスを参照
+        const txMessage = symbolCore.PlainMessage.create(generatedMessage);
 
-        // [4] RepositoryFactoryHttp の参照を修正
-        const repoFactory = new symbol.RepositoryFactoryHttp(NODE);
+        const repoFactory = new symbolCore.RepositoryFactoryHttp(NODE);
 
         // lastValueFrom を使用して非同期処理を実行
         const networkType = await lastValueFrom(repoFactory.getNetworkType());
@@ -114,23 +114,23 @@ module.exports = async (req, res) => {
         
         const networkRepository = repoFactory.createNetworkRepository();
         const networkProperties = await lastValueFrom(networkRepository.getNetworkProperties());
+        
         // v3系では UInt64 オブジェクトを number/BigInt に変換
         const epochAdjustment = networkProperties.network.epochAdjustment.compact(); 
 
-        // [4] Account と Address の参照を修正
-        const senderAccount = symbol.Account.createFromPrivateKey(PRIVATE_KEY, networkType);
-        const recipient = symbol.Address.createFromRawAddress(recipientAddress);
+        // [4] symbolCore を使用してクラスを参照
+        const senderAccount = symbolCore.Account.createFromPrivateKey(PRIVATE_KEY, networkType);
+        const recipient = symbolCore.Address.createFromRawAddress(recipientAddress);
 
-        // [4][5] v3.3.0 に合わせた TransferTransaction の修正
-        const transferTransaction = symbol.TransferTransaction.create(
-            // Deadline の作成にエポック調整値を使用
-            symbol.Deadline.create(epochAdjustment), 
+        // [4][5] v3.3.0 に合わせた TransferTransaction の修正と symbolCore を使用
+        const transferTransaction = symbolCore.TransferTransaction.create(
+            symbolCore.Deadline.create(epochAdjustment), 
             recipient,
-            [new symbol.Mosaic(new symbol.MosaicId('44FD959F9F2ECF4D'), symbol.UInt64.fromUint(totalTokenAmount))],
+            [new symbolCore.Mosaic(new symbolCore.MosaicId('44FD959F9F2ECF4D'), symbolCore.UInt64.fromUint(totalTokenAmount))],
             txMessage,
             networkType,
             // 最終引数で maxFee を指定
-            symbol.UInt64.fromUint(1000000) 
+            symbolCore.UInt64.fromUint(1000000) 
         );
         
         // 署名とアナウンス
