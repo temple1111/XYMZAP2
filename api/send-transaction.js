@@ -52,6 +52,8 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
         return response.text();
     } catch (error) {
         console.error("Error generating message with Gemini:", error);
+        //さらに、エラーメッセージのテキスト部分も確認
+        console.error("Gemini Error Message Detail:", error.message);
         return fallbackMessage; // Fallback message
     }
 }
