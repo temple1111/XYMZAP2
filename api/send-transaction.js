@@ -2,27 +2,21 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { lastValueFrom } from 'rxjs'; 
-
-// 🚨 究極最終解決策: Symbol SDK のクラスを直接 named import
-import { 
-    Account, Address, Deadline, Mosaic, MosaicId, NetworkType, 
-    PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 
-} from 'symbol-sdk'; 
-// 🚨 symbol.default の参照も不要になりました
+// 🚨 修正: Symbol SDK は Named Import を削除し、後でダイナミックに読み込みます
 
 // --- Symbol-related constants ---
 const NODE = 'https://xym.jp1.node.leywapool.com:3001'; 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 // --- Gemini-related setup ---
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// ... (中略: Gemini設定、Workout設定、generateTransactionMessage関数は変更なし) ...
+const GEMINI_API_KEY = process.env.PRIVATE_KEY;
 if (!GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY is not set in environment variables.');
 }
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-// --- Workout-related constants ---
 const WORKOUT_SETTINGS = {
     crunches: 	 	{ name: '腹筋', name_en: 'Crunches', tokenMultiplier: 1.0, caloriesPerRep: 0.4 },
     pushups: 	 	{ name: '腕立て伏せ', name_en: 'Push-ups', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
@@ -31,13 +25,9 @@ const WORKOUT_SETTINGS = {
     general_workout: { name: '筋トレ全般', name_en: 'General Workout', tokenMultiplier: 1.0, caloriesPerRep: 0.5 },
 };
 
-/**
- * Generates a motivational message for multiple workouts.
- */
 async function generateTransactionMessage(workouts, lang = 'ja') {
     let promptTemplate;
     let fallbackMessage;
-
     const workoutSummary = workouts.map(w => {
         const workoutName = lang === 'en' && WORKOUT_SETTINGS[w.type] && WORKOUT_SETTINGS[w.type].name_en ? WORKOUT_SETTINGS[w.type].name_en : w.name;
         return lang === 'en' ? `${workoutName} for ${w.reps} reps` : `${workoutName}を${w.reps}回`;
@@ -61,8 +51,6 @@ async function generateTransactionMessage(workouts, lang = 'ja') {
         return fallbackMessage; // Fallback message
     }
 }
-
-
 // =========================================================================
 // API エンドポイントのハンドラー
 // =========================================================================
@@ -81,6 +69,13 @@ export default async (req, res) => {
     if (!recipientAddress || !Array.isArray(workouts) || workouts.length === 0) {
         return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
     }
+
+    // 🚨 究極最終修正: 必要なクラスをローカル関数内で動的にインポートし、展開する
+    const SymbolSDK = await import('symbol-sdk');
+    const { 
+        Account, Address, Deadline, Mosaic, MosaicId, NetworkType, 
+        PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 
+    } = SymbolSDK.default || SymbolSDK; // ESM/CJS 両方のパターンに対応
 
     try {
         let totalTokenAmount = 0;
@@ -103,7 +98,7 @@ export default async (req, res) => {
 
         const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
         
-        // 🚨 Named Import で直接アクセス
+        // 🚨 ローカル展開されたクラスにアクセス
         const txMessage = PlainMessage.create(generatedMessage);
 
         const repoFactory = new RepositoryFactoryHttp(NODE);
@@ -116,7 +111,7 @@ export default async (req, res) => {
         
         const epochAdjustment = networkProperties.network.epochAdjustment.compact(); 
 
-        // 🚨 Named Import で直接アクセス
+        // 🚨 ローカル展開されたクラスにアクセス
         const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
         const recipient = Address.createFromRawAddress(recipientAddress);
 
