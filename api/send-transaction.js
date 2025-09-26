@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    // 🚨 req.body から変数を最優先で取得 (ReferenceError対策)
+    // req.body から変数を最優先で取得
     const { recipientAddress, workouts, lang } = req.body; 
 
     if (!PRIVATE_KEY) {
@@ -77,10 +77,13 @@ module.exports = async (req, res) => {
 
     // [2] Symbol SDK をダイナミックインポート (ESM 対策)
     const symbol = await import('symbol-sdk');
-    const lastValueFrom = rxjs.lastValueFrom; // [3] requireした rxjs から lastValueFrom を取得
+    const lastValueFrom = rxjs.lastValueFrom; 
 
-    // 🚨 最終的な修正: symbol.default からクラスを取得する (TypeError対策)
-    const symbolCore = symbol.default || symbol; 
+    // 🚨 最終修正: symbol の default プロパティから必要なクラスをすべて展開
+    const { 
+        Account, Address, Deadline, Mosaic, MosaicId, NetworkType, 
+        PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 
+    } = symbol.default || symbol; // default がなければ symbol から展開 (保険)
 
     try {
         let totalTokenAmount = 0;
@@ -103,10 +106,10 @@ module.exports = async (req, res) => {
 
         const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
         
-        // [4] symbolCore を使用してクラスを参照
-        const txMessage = symbolCore.PlainMessage.create(generatedMessage);
+        // 🚨 クラス名にプレフィックスなしで直接アクセス
+        const txMessage = PlainMessage.create(generatedMessage);
 
-        const repoFactory = new symbolCore.RepositoryFactoryHttp(NODE);
+        const repoFactory = new RepositoryFactoryHttp(NODE);
 
         // lastValueFrom を使用して非同期処理を実行
         const networkType = await lastValueFrom(repoFactory.getNetworkType());
@@ -115,22 +118,20 @@ module.exports = async (req, res) => {
         const networkRepository = repoFactory.createNetworkRepository();
         const networkProperties = await lastValueFrom(networkRepository.getNetworkProperties());
         
-        // v3系では UInt64 オブジェクトを number/BigInt に変換
         const epochAdjustment = networkProperties.network.epochAdjustment.compact(); 
 
-        // [4] symbolCore を使用してクラスを参照
-        const senderAccount = symbolCore.Account.createFromPrivateKey(PRIVATE_KEY, networkType);
-        const recipient = symbolCore.Address.createFromRawAddress(recipientAddress);
+        // 🚨 クラス名にプレフィックスなしで直接アクセス
+        const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
+        const recipient = Address.createFromRawAddress(recipientAddress);
 
-        // [4][5] v3.3.0 に合わせた TransferTransaction の修正と symbolCore を使用
-        const transferTransaction = symbolCore.TransferTransaction.create(
-            symbolCore.Deadline.create(epochAdjustment), 
+        // 🚨 クラス名にプレフィックスなしで直接アクセス
+        const transferTransaction = TransferTransaction.create(
+            Deadline.create(epochAdjustment), 
             recipient,
-            [new symbolCore.Mosaic(new symbolCore.MosaicId('44FD959F9F2ECF4D'), symbolCore.UInt64.fromUint(totalTokenAmount))],
+            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(totalTokenAmount))],
             txMessage,
             networkType,
-            // 最終引数で maxFee を指定
-            symbolCore.UInt64.fromUint(1000000) 
+            UInt64.fromUint(1000000) 
         );
         
         // 署名とアナウンス
