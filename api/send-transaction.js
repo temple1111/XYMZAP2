@@ -1,4 +1,5 @@
-import sym from "symbol-sdk";
+import * as sym from "symbol-sdk";
+const sdk = sym.default; // CJS/ESM相互運用のため、defaultプロパティから実体を取得
 
 // 各ワークアウトの消費カロリー（トークン量の計算に使用）
 const WORKOUT_CALORIES = {
@@ -73,26 +74,26 @@ export default async function handler(req, res) {
     }
 
     try {
-        const mosaicId = new sym.MosaicId(process.env.MOSAIC_ID);
+        const mosaicId = new sdk.MosaicId(process.env.MOSAIC_ID);
         const node = process.env.NODE;
         const networkType = Number(process.env.NETWORK_TYPE);
         const privateKey = process.env.PRIVATE_KEY;
         const epochAdjustment = Number(process.env.EPOCH_ADJUSTMENT);
 
-        const repositoryFactory = new sym.RepositoryFactoryHttp(node);
+        const repositoryFactory = new sdk.RepositoryFactoryHttp(node);
         const transactionHttp = repositoryFactory.createTransactionRepository();
         const receiptHttp = repositoryFactory.createReceiptRepository();
-        const transactionService = new sym.TransactionService(transactionHttp, receiptHttp);
+        const transactionService = new sdk.TransactionService(transactionHttp, receiptHttp);
         const networkGenerationHash = await repositoryFactory.getGenerationHash().toPromise();
 
-        const senderAccount = sym.Account.createFromPrivateKey(privateKey, networkType);
-        const recipientAddr = sym.Address.createFromRawAddress(recipientAddress);
+        const senderAccount = sdk.Account.createFromPrivateKey(privateKey, networkType);
+        const recipientAddr = sdk.Address.createFromRawAddress(recipientAddress);
 
-        const transferTransaction = sym.TransferTransaction.create(
-            sym.Deadline.create(epochAdjustment),
+        const transferTransaction = sdk.TransferTransaction.create(
+            sdk.Deadline.create(epochAdjustment),
             recipientAddr,
-            [new sym.Mosaic(mosaicId, sym.UInt64.fromUint(amount * 1000000))], // モザイクの可分性を6と仮定
-            sym.PlainMessage.create(message),
+            [new sdk.Mosaic(mosaicId, sdk.UInt64.fromUint(amount * 1000000))], // モザイクの可分性を6と仮定
+            sdk.PlainMessage.create(message),
             networkType
         );
 
