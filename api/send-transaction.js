@@ -1,4 +1,4 @@
-import * as sym from "symbol-sdk";
+const sym = require("symbol-sdk");
 
 // 各ワークアウトの消費カロリー（トークン量の計算に使用）
 const WORKOUT_CALORIES = {
