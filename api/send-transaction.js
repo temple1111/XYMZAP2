@@ -1,10 +1,4 @@
-import * as sym from "symbol-sdk";
-// const sdk = sym.default; // CJS/ESM相互運用のため、defaultプロパティから実体を取得
-
-// --- デバッグ用ログ ---
-console.log("DEBUG: sym object:", sym);
-console.log("DEBUG: sym keys:", Object.keys(sym));
-// --- デバッグ用ログ 終わり ---
+// トップレベルのimport文は削除します
 
 // 各ワークアウトの消費カロリー（トークン量の計算に使用）
 const WORKOUT_CALORIES = {
@@ -79,26 +73,29 @@ export default async function handler(req, res) {
     }
 
     try {
-        const mosaicId = new sdk.MosaicId(process.env.MOSAIC_ID);
+        // ここでsymbol-sdkを動的にインポートします
+        const sym = await import('symbol-sdk');
+
+        const mosaicId = new sym.MosaicId(process.env.MOSAIC_ID);
         const node = process.env.NODE;
         const networkType = Number(process.env.NETWORK_TYPE);
         const privateKey = process.env.PRIVATE_KEY;
         const epochAdjustment = Number(process.env.EPOCH_ADJUSTMENT);
 
-        const repositoryFactory = new sdk.RepositoryFactoryHttp(node);
+        const repositoryFactory = new sym.RepositoryFactoryHttp(node);
         const transactionHttp = repositoryFactory.createTransactionRepository();
         const receiptHttp = repositoryFactory.createReceiptRepository();
-        const transactionService = new sdk.TransactionService(transactionHttp, receiptHttp);
+        const transactionService = new sym.TransactionService(transactionHttp, receiptHttp);
         const networkGenerationHash = await repositoryFactory.getGenerationHash().toPromise();
 
-        const senderAccount = sdk.Account.createFromPrivateKey(privateKey, networkType);
-        const recipientAddr = sdk.Address.createFromRawAddress(recipientAddress);
+        const senderAccount = sym.Account.createFromPrivateKey(privateKey, networkType);
+        const recipientAddr = sym.Address.createFromRawAddress(recipientAddress);
 
-        const transferTransaction = sdk.TransferTransaction.create(
-            sdk.Deadline.create(epochAdjustment),
+        const transferTransaction = sym.TransferTransaction.create(
+            sym.Deadline.create(epochAdjustment),
             recipientAddr,
-            [new sdk.Mosaic(mosaicId, sdk.UInt64.fromUint(amount * 1000000))], // モザイクの可分性を6と仮定
-            sdk.PlainMessage.create(message),
+            [new sym.Mosaic(mosaicId, sym.UInt64.fromUint(amount * 1000000))], // モザイクの可分性を6と仮定
+            sym.PlainMessage.create(message),
             networkType
         );
 
@@ -108,8 +105,8 @@ export default async function handler(req, res) {
         res.status(200).json({
             message: 'Transaction successful',
             hash: signedTransaction.hash,
-            transactionMessage: message, // 生成したメッセージをフロントエンドに返す
-            estimatedCalories: estimatedCalories // 計算したカロリーも返す
+            transactionMessage: message,
+            estimatedCalories: estimatedCalories
         });
 
     } catch (error) {
