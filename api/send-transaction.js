@@ -1,5 +1,10 @@
 import * as sym from "symbol-sdk";
-const sdk = sym.default; // CJS/ESM相互運用のため、defaultプロパティから実体を取得
+// const sdk = sym.default; // CJS/ESM相互運用のため、defaultプロパティから実体を取得
+
+// --- デバッグ用ログ ---
+console.log("DEBUG: sym object:", sym);
+console.log("DEBUG: sym keys:", Object.keys(sym));
+// --- デバッグ用ログ 終わり ---
 
 // 各ワークアウトの消費カロリー（トークン量の計算に使用）
 const WORKOUT_CALORIES = {
