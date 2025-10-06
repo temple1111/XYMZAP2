@@ -1,119 +1,137 @@
-// トップレベルのimport文は削除します
+const { Account, Address, Deadline, Mosaic, MosaicId, NetworkType, PlainMessage, RepositoryFactoryHttp, TransferTransaction, UInt64 } = require('symbol-sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// 各ワークアウトの消費カロリー（トークン量の計算に使用）
-const WORKOUT_CALORIES = {
-    crunches: 0.3,
-    pushups: 0.5,
-    squats: 0.4,
-    back_extensions: 0.2,
-    general_workout: 0.1,
+// --- Symbol-related constants ---
+const NODE = 'https://xymtokyo.harvest-node.net:3001';
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const SYMBOL_EPOCH_ADJUSTMENT = 1615853188;
+
+// --- Gemini-related setup ---
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not set in environment variables.');
+}
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+// --- Workout-related constants ---
+const WORKOUT_SETTINGS = {
+    crunches:       { name: '腹筋', name_en: 'Crunches', tokenMultiplier: 1.0, caloriesPerRep: 0.4 },
+    pushups:        { name: '腕立て伏せ', name_en: 'Push-ups', tokenMultiplier: 1.2, caloriesPerRep: 0.6 },
+    squats:         { name: 'スクワット', name_en: 'Squats', tokenMultiplier: 1.5, caloriesPerRep: 0.8 },
+    back_extensions: { name: '背筋', name_en: 'Back Extensions', tokenMultiplier: 1.2, caloriesPerRep: 0.5 },
+    general_workout: { name: '筋トレ全般', name_en: 'General Workout', tokenMultiplier: 1.0, caloriesPerRep: 0.5 },
 };
 
-// AIトレーナーのメッセージ
-const AI_MESSAGES = [
-    "素晴らしいトレーニングでした！その調子で頑張りましょう！",
-    "今日の努力が、明日の強さにつながります。",
-    "すごい集中力でしたね！次も期待しています。",
-    "完璧なフォームでした。筋肉が喜んでいますよ！",
-    "限界を超えるその精神、まさにアスリートです！"
-];
-
 /**
- * ワークアウトの内容から、送信するトークン量とメッセージを生成する
+ * Generates a motivational message for multiple workouts.
+ * @param {Array<object>} workouts - Array of workout objects, e.g., [{name: 'スクワット', reps: 50}]
+ * @param {string} lang - The desired language for the message ('ja' or 'en').
+ * @returns {Promise<string>} A motivational message.
  */
-function getWorkoutAmountAndMessage(workouts) {
-    let totalCalories = 0;
-    let messageParts = [];
+async function generateTransactionMessage(workouts, lang = 'ja') {
+    let promptTemplate;
+    let fallbackMessage;
 
-    // ワークアウトの種類と翻訳キーのマッピング
-    const workoutTranslations = {
-        "crunches": "腹筋",
-        "pushups": "腕立て伏せ",
-        "squats": "スクワット",
-        "back_extensions": "背筋",
-        "general_workout": "その他"
-    };
+    const workoutSummary = workouts.map(w => {
+        const workoutName = lang === 'en' && WORKOUT_SETTINGS[w.type] && WORKOUT_SETTINGS[w.type].name_en ? WORKOUT_SETTINGS[w.type].name_en : w.name;
+        return lang === 'en' ? `${workoutName} for ${w.reps} reps` : `${workoutName}を${w.reps}回`;
+    }).join(lang === 'en' ? ', ' : '、');
 
-    workouts.forEach(workout => {
-        const caloriesPerRep = WORKOUT_CALORIES[workout.type] || 0.1;
-        totalCalories += workout.reps * caloriesPerRep;
-        const workoutName = workoutTranslations[workout.type] || workout.type;
-        messageParts.push(`${workoutName}: ${workout.reps}回`);
-    });
-
-    const randomAiMessage = AI_MESSAGES[Math.floor(Math.random() * AI_MESSAGES.length)];
-    const transactionMessage = `今回のトレーニング: ${messageParts.join('、')}。 ${randomAiMessage}`;
-    
-    // トークン量（整数）、メッセージ、消費カロリーを返す
-    return {
-        amount: Math.round(totalCalories),
-        message: transactionMessage,
-        estimatedCalories: totalCalories
-    };
-}
-
-
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
-    }
-
-    console.log("Received request body:", JSON.stringify(req.body));
-
-    const { recipientAddress, workouts } = req.body;
-
-    if (!recipientAddress || !workouts || !Array.isArray(workouts) || workouts.length === 0) {
-        return res.status(400).json({ message: 'Missing or invalid parameters.' });
-    }
-
-    const { amount, message, estimatedCalories } = getWorkoutAmountAndMessage(workouts);
-
-    if (amount <= 0) {
-        return res.status(400).json({ message: 'Workout resulted in zero amount.' });
+    if (lang === 'en') {
+        promptTemplate = `You are a super passionate fitness trainer. Like a drill sergeant, but with love, your style is to push users to their limits. The user has just completed a great training session. The content is "${workoutSummary}". Praise this overall effort and generate a super hot, powerful, and motivating one-liner (within 100 characters) that ignites the user's soul. Your response MUST be ONLY in English.`;
+        fallbackMessage = "Great workout! Nice fight!";
+    } else {
+        promptTemplate = `あなたは、超熱血なフィットネストレーナーです。まるで鬼軍曹のように、しかし愛情を込めて、ユーザーを限界まで追い込むのがあなたのスタイルです。ユーザーが今、素晴らしいトレーニングセッションを終えました。内容は「${workoutSummary}」です。この総合的な努力を称え、ユーザーの魂に火をつけるような、最高に熱く、パワフルで、モチベーションが爆上がりする一言（100文字以内）を生成してください。`;
+        fallbackMessage = "素晴らしいトレーニングでした！ナイスファイト！";
     }
 
     try {
-        // ここでsymbol-sdkを動的にインポートします
-        const sym = await import('symbol-sdk');
+        const result = await geminiModel.generateContent(promptTemplate);
+        const response = await result.response;
+        return response.text();
+    } catch (error) {
+        console.error("Error generating message with Gemini:", error);
+        return fallbackMessage; // Fallback message
+    }
+}
 
-        const mosaicId = new sym.MosaicId(process.env.MOSAIC_ID);
-        const node = process.env.NODE;
-        const networkType = Number(process.env.NETWORK_TYPE);
-        const privateKey = process.env.PRIVATE_KEY;
-        const epochAdjustment = Number(process.env.EPOCH_ADJUSTMENT);
+module.exports = async (req, res) => {
+    console.log('Function started.');
+    if (req.method !== 'POST') {
+        console.log('Method not POST.');
+        return res.status(405).json({ message: 'Method Not Allowed' });
+    }
 
-        const repositoryFactory = new sym.RepositoryFactoryHttp(node);
-        const transactionHttp = repositoryFactory.createTransactionRepository();
-        const receiptHttp = repositoryFactory.createReceiptRepository();
-        const transactionService = new sym.TransactionService(transactionHttp, receiptHttp);
-        const networkGenerationHash = await repositoryFactory.getGenerationHash().toPromise();
+    if (!PRIVATE_KEY) {
+        console.log('PRIVATE_KEY not set.');
+        return res.status(500).json({ message: 'Server configuration error: Private key not set.' });
+    }
 
-        const senderAccount = sym.Account.createFromPrivateKey(privateKey, networkType);
-        const recipientAddr = sym.Address.createFromRawAddress(recipientAddress);
+    const { recipientAddress, workouts, lang } = req.body; // Extract lang from request body
 
-        const transferTransaction = sym.TransferTransaction.create(
-            sym.Deadline.create(epochAdjustment),
-            recipientAddr,
-            [new sym.Mosaic(mosaicId, sym.UInt64.fromUint(amount * 1000000))], // モザイクの可分性を6と仮定
-            sym.PlainMessage.create(message),
+    if (!recipientAddress || !Array.isArray(workouts) || workouts.length === 0) {
+        console.log('Invalid input.');
+        return res.status(400).json({ message: 'Invalid input. Please provide a valid address and at least one workout.' });
+    }
+
+    try {
+        console.log('Starting workout processing.');
+        let totalTokenAmount = 0;
+        let totalCalories = 0;
+        const workoutDetailsForPrompt = [];
+
+        for (const workout of workouts) {
+            const settings = WORKOUT_SETTINGS[workout.type];
+            if (!settings || !workout.reps || workout.reps <= 0) {
+                // Skip invalid entries silently or return an error
+                continue;
+            }
+            totalTokenAmount += Math.floor(workout.reps * settings.tokenMultiplier);
+            totalCalories += workout.reps * settings.caloriesPerRep;
+            workoutDetailsForPrompt.push({ type: workout.type, name: settings.name, reps: workout.reps }); // Pass workout.type
+        }
+
+        if (totalTokenAmount <= 0) {
+            return res.status(400).json({ message: 'No valid workouts provided to calculate a reward.' });
+        }
+
+        const generatedMessage = await generateTransactionMessage(workoutDetailsForPrompt, lang);
+        console.log('Gemini message generated.');
+        const txMessage = PlainMessage.create(generatedMessage);
+
+        const repoFactory = new RepositoryFactoryHttp(NODE);
+        console.log('RepositoryFactoryHttp created.');
+        const networkType = await repoFactory.getNetworkType().toPromise();
+        console.log('Network type obtained.');
+        const generationHash = await repoFactory.getGenerationHash().toPromise();
+        console.log('Generation hash obtained.');
+        const senderAccount = Account.createFromPrivateKey(PRIVATE_KEY, networkType);
+        const recipient = Address.createFromRawAddress(recipientAddress);
+
+        const transferTransaction = TransferTransaction.create(
+            Deadline.create(SYMBOL_EPOCH_ADJUSTMENT, 2),
+            recipient,
+            [new Mosaic(new MosaicId('44FD959F9F2ECF4D'), UInt64.fromUint(totalTokenAmount))],
+            txMessage,
             networkType
-        );
+        ).setMaxFee(100);
 
-        const signedTransaction = senderAccount.sign(transferTransaction, networkGenerationHash);
-        await transactionService.announce(signedTransaction).toPromise();
+        const signedTx = senderAccount.sign(transferTransaction, generationHash);
+        console.log('Transaction signed.');
+        
+        const transactionHttp = repoFactory.createTransactionRepository();
+        await transactionHttp.announce(signedTx).toPromise();
+        console.log('Transaction announced successfully.');
 
         res.status(200).json({
-            message: 'Transaction successful',
-            hash: signedTransaction.hash,
-            transactionMessage: message,
-            estimatedCalories: estimatedCalories
+            message: 'Transaction announced successfully!',
+            transactionMessage: txMessage.payload,
+            estimatedCalories: totalCalories
         });
 
     } catch (error) {
-        console.error("Transaction error:", error);
-        res.status(500).json({
-            message: 'An error occurred during the transaction process.',
-            error: error.message,
-        });
+        console.error('Error in transaction process:', error);
+        res.status(500).json({ message: 'An error occurred during the transaction process.', error: error.message });
     }
-}
+};
