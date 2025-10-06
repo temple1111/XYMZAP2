@@ -1,5 +1,5 @@
 // --- Frontend Logic ---
-const NODE = 'https://xym.jp1.node.leywapool.com:3001';
+const NODE = 'https://xymtokyo.harvest-node.net:3001';
 const sym = require("/node_modules/symbol-sdk");
 const repo = new sym.RepositoryFactoryHttp(NODE);
 

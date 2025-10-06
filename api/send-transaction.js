@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { lastValueFrom } from 'rxjs'; 
 
 // --- Symbol-related constants ---
-const NODE = 'https://xym.jp1.node.leywapool.com:3001'; 
+const NODE = 'https://xymtokyo.harvest-node.net:3001'; 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 // --- Gemini-related setup ---
