@@ -5,13 +5,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method Not Allowed" });
   }
 
+  // 受け取ったリクエストボディをログに出力
+  console.log("Received request body:", JSON.stringify(req.body));
+
   const {
     recipientRawAddress,
     amount,
     message,
   } = req.body;
 
-  if (!recipientRawAddress || !amount || !message) {
+  // パラメータチェック
+  if (!recipientRawAddress || amount == null || message == null) {
+    // 検証失敗した場合も、どの値が問題だったかログに出力
+    console.error(
+      "Validation failed. recipientRawAddress:", recipientRawAddress, 
+      "amount:", amount, 
+      "message:", message
+    );
     return res.status(400).json({ message: "Missing required parameters" });
   }
 
